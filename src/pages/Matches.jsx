@@ -146,10 +146,10 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
   const isBetDraw = bH !== "" && bA !== "" && parseInt(bH) === parseInt(bA);
 
   const fetchedBet = fetchedBetData?.find((bet) => bet?.matchId === match?.id)
-  console.log(fetchedBetData)
-  console.log(1, fetchedBetData[0].matchId)
-  console.log(2, match.id)
-  console.log(148, fetchedBet)
+  // console.log(fetchedBetData)
+  // console.log(1, fetchedBetData[0].matchId)
+  // console.log(2, match.id)
+  // console.log(148, fetchedBet)
 
   const handleScore = (side, value) => {
     const val = value === "" ? "" : Math.max(0, parseInt(value) || 0);
