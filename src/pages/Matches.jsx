@@ -84,7 +84,7 @@ function Header({ username }) {
         </div>
         <div className="flex-1">
           <h1 className="font-display text-lg font-bold leading-tight">Skibidi Essa Bet</h1>
-          <p className="text-xs text-secondary-foreground/60 font-medium">World Cup 2026</p>
+          <p className="text-xs text-secondary-foreground/60 font-medium">World Cup 2026 v1.1</p>
         </div>
         {username && (
           <button onClick={handleLogout} className="flex items-center gap-1.5 text-xs text-secondary-foreground/60 hover:text-secondary-foreground transition-colors">
