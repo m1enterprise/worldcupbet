@@ -17,6 +17,10 @@
  * - deleteBet(betId)            → usuwa bet
  */
 
+import { be } from "date-fns/locale";
+import { getMatchById } from "./matchService";
+import { supabase } from "../supabase";
+
 // import { base44 } from "@/api/base44Client";
 
 const CUTOFF_MINUTES = 1; // minut przed meczem - ostatnia chwila na bet
@@ -25,29 +29,41 @@ const CUTOFF_MINUTES = 1; // minut przed meczem - ostatnia chwila na bet
  * Zwraca true jeśli można jeszcze obstawiać dany mecz.
  * Cutoff = 1 minuta przed kickoffem.
  */
-export function canBetOnMatch(match) {
+export async function canBetOnMatch(betData) {
+    // fetch match by id
+    const match = await getMatchById(betData.matchId)
+    if (!match) return console.error("could not fetch match by id")
+// '2026-06-10T19:00:00Z'
   if (match.status === "finished" || match.status === "live") return false;
 
-  const matchDateTime = parseMatchDateTime(match.date, match.time);
-  if (!matchDateTime) return true; // brak daty - pozwól obstawiać
+//   const matchDateTime = parseMatchDateTime(match.date, match.time);
+//   const matchDateTime = parseMatchDateTime(match.utcDate);
+const matchDateTime = new Date(match.utcDate);
+
+    console.log("check match when", matchDateTime)
+
+//   if (!matchDateTime) return true; // brak daty - pozwól obstawiać
 
   const now = new Date();
-  const cutoff = new Date(matchDateTime.getTime() - CUTOFF_MINUTES * 60 * 1000);
-  return now < cutoff;
+  const ctf = new Date(matchDateTime.getTime() - CUTOFF_MINUTES * 60 * 1000);
+  console.log(now)
+  console.log(ctf)
+  console.log(now<ctf)
+  return now < ctf;
 }
 
 /**
  * Parsuje datę i czas meczu do obiektu Date.
  */
-function parseMatchDateTime(dateStr, timeStr) {
-  if (!dateStr) return null;
-  try {
-    const time = timeStr || "00:00";
-    return new Date(`${dateStr}T${time}:00`);
-  } catch {
-    return null;
-  }
-}
+// function parseMatchDateTime(utcDate) {
+//   if (!utcDate) return null;
+//   try {
+//     const time = timeStr || "00:00";
+//     return new Date(`${utcDate}T${time}:00`);
+//   } catch {
+//     return null;
+//   }
+// }
 
 /**
  * Zapisuje lub aktualizuje bet dla zalogowanego usera.
@@ -59,31 +75,37 @@ function parseMatchDateTime(dateStr, timeStr) {
  * @returns {Object} zapisany rekord betu
  * @throws {Error} jeśli za późno na obstawianie
  */
-export async function saveBet(userId, match, betData) {
-  if (!canBetOnMatch(match)) {
-    throw new Error("Nie mozna obstawiec tego meczu ktory sie rozpoczal, pozdro.");
-  }
-
+export async function saveBet(userId, betData) {
+    console.log('saveBet', userId, betData)
+    const canBet = await canBetOnMatch(betData)
+console.log('canBet: ',canBet)
+    if (!canBet) {
+        return null
+    }
+console.log('went after canBet check - bet valid')
   const payload = {
-    match_id: String(match.id),
-    match_date: match.date,
-    match_time: match.time,
-    home_team: match.homeTeam,
-    away_team: match.awayTeam,
-    home_score: betData.homeScore !== "" ? Number(betData.homeScore) : null,
-    away_score: betData.awayScore !== "" ? Number(betData.awayScore) : null,
-    extra_time_winner: betData.extraTimeWinner || "",
+    matchId: betData.matchId,
+    userId: userId,
+    matchUtcDate: betData.matchUtcDate,
+    homeTeam: betData.homeTeam,
+    awayTeam: betData.awayTeam,
+    homeScore: betData.homeScore !== "" ? Number(betData.homeScore) : null,
+    awayScore: betData.awayScore !== "" ? Number(betData.awayScore) : null,
+    extraTimeWinner: betData.extraTimeWinner || "",
   };
 
   // Sprawdź czy bet już istnieje dla tego meczu
-  const existing = await getBetForMatch(String(match.id));
+  const existing = await getBetForMatch(userId, betData.matchId);
 
   if (existing) {
     // return await base44.entities.Bet.update(existing.id, payload);
     const { data, error } = await supabase
-        .from('bets')
-        .insert(payload)
-        .select();
+        .from("bets")
+        .update(payload)
+        .eq("userId", userId)
+        .eq("matchId", betData.matchId)
+        .select()
+        .single();
     
       if (error) {
         console.log(error)
@@ -95,13 +117,9 @@ export async function saveBet(userId, match, betData) {
   } else {
     // return await base44.entities.Bet.create(payload);
     const { data, error } = await supabase
-        .from('users')
+        .from('bets')
         .insert([
-          {
-            username,
-            password,
-            bets: [],
-          },
+          payload
         ])
         .select();
     
@@ -130,12 +148,13 @@ export async function getUserBets() {
  * @param {string} matchId 
  * @returns {Object|null} bet lub null
  */
-export async function getBetForMatch(matchId) {
+export async function getBetForMatch(userId, matchId) {
   const { data, error } = await supabase
       .from('bets')
       .select('*')
-      .eq('matchId', matchId)
-      .single();
+      .eq("userId", userId)
+      .eq("matchId", matchId)
+      .maybeSingle();
   
     if (error) {
       console.error(error);

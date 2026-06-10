@@ -4,7 +4,7 @@ import { fetchMatches } from "../lib/api";
 import { loadBets, loadBonusBets, saveBonusBets, getSession, logout } from "../lib/auth";
 import { format, parseISO } from "date-fns";
 import { pl } from "date-fns/locale";
-import { Trophy, CalendarDays, Table2, Star, BarChart3, Save, LogOut, Target } from "lucide-react";
+import { Trophy, Table2, Star, BarChart3, Save, LogOut, Target, LoaderPinwheel } from "lucide-react";
 import { toast } from "sonner";
 
 const PHASE_NAMES = {
@@ -38,7 +38,7 @@ function calculateMatchPoints(bet, result) {
 function BottomNav() {
   const location = useLocation();
   const items = [
-    { path: "/", icon: CalendarDays, label: "Mecze" },
+    { path: "/", icon: LoaderPinwheel, label: "Mecze" },
     { path: "/standings", icon: Table2, label: "Tabele" },
     { path: "/my-bets", icon: Star, label: "Moje typy" },
     { path: "/points", icon: BarChart3, label: "Punkty" },

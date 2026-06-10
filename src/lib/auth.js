@@ -42,7 +42,6 @@ export function saveBets(bets) {
 export function saveBetsForDay(dayBets) {
   const bets = loadBets();
   Object.entries(dayBets).forEach(([id, bet]) => { bets[id] = bet; });
-  saveBets(bets);
   return bets;
 }
 

@@ -2,7 +2,7 @@ import React, { useMemo, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { fetchMatches } from "../lib/api";
 import { loadBets, loadBonusBets, getSession, logout } from "../lib/auth";
-import { Trophy, CalendarDays, Table2, Star, BarChart3, Target, Flame, TrendingUp, LogOut } from "lucide-react";
+import { Trophy, Table2, Star, BarChart3, Target, Flame, TrendingUp, LogOut, LoaderPinwheel } from "lucide-react";
 
 function calculateMatchPoints(bet, result) {
   if (bet.homeScore === null || bet.awayScore === null || result.homeScore === null || result.awayScore === null)
@@ -30,7 +30,7 @@ function calculateMatchPoints(bet, result) {
 function BottomNav() {
   const location = useLocation();
   const items = [
-    { path: "/", icon: CalendarDays, label: "Mecze" },
+    { path: "/", icon: LoaderPinwheel, label: "Mecze" },
     { path: "/standings", icon: Table2, label: "Tabele" },
     { path: "/my-bets", icon: Star, label: "Moje typy" },
     { path: "/points", icon: BarChart3, label: "Punkty" },

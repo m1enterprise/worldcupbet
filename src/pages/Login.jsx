@@ -47,7 +47,7 @@ export default function Login() {
             <Trophy className="w-8 h-8 text-primary-foreground" />
           </div>
           <h1 className="text-2xl font-display font-bold">World Cup 2026</h1>
-          <p className="text-sm text-muted-foreground mt-1">Zaloguj się do typera</p>
+          <p className="text-sm text-muted-foreground mt-1">Zaloguj się do Skibidi Essa Bet</p>
         </div>
 
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">

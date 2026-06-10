@@ -4,7 +4,7 @@ import { fetchMatches } from "../lib/api";
 import { loadBets, saveBetsForDay, getSession, logout } from "../lib/auth";
 import { format, parseISO, isToday, isTomorrow } from "date-fns";
 import { pl } from "date-fns/locale";
-import { Trophy, CalendarDays, Table2, Star, BarChart3, Save, CheckCircle2, RefreshCw, LogOut } from "lucide-react";
+import { Trophy, Table2, Star, BarChart3, Save, CheckCircle2, RefreshCw, LogOut, LoaderPinwheel} from "lucide-react";
 import { toast } from "sonner";
 
 // ─── Scoring Engine ───────────────────────────────────────────────────────────
@@ -50,7 +50,7 @@ const PHASE_NAMES = {
 function BottomNav() {
   const location = useLocation();
   const items = [
-    { path: "/", icon: CalendarDays, label: "Mecze" },
+    { path: "/", icon: LoaderPinwheel, label: "Mecze" },
     { path: "/standings", icon: Table2, label: "Tabele" },
     { path: "/my-bets", icon: Star, label: "Moje typy" },
     { path: "/points", icon: BarChart3, label: "Punkty" },
@@ -83,8 +83,8 @@ function Header({ username }) {
           <Trophy className="w-5 h-5 text-primary-foreground" />
         </div>
         <div className="flex-1">
-          <h1 className="font-display text-lg font-bold leading-tight">World Cup 2026</h1>
-          <p className="text-xs text-secondary-foreground/60 font-medium">Typer turniejowy</p>
+          <h1 className="font-display text-lg font-bold leading-tight">Skibidi Essa Bet</h1>
+          <p className="text-xs text-secondary-foreground/60 font-medium">World Cup 2026</p>
         </div>
         {username && (
           <button onClick={handleLogout} className="flex items-center gap-1.5 text-xs text-secondary-foreground/60 hover:text-secondary-foreground transition-colors">
@@ -146,7 +146,7 @@ function MatchCard({ match, bet, onChange, disabled }) {
 
   const handleScore = (side, value) => {
     const val = value === "" ? "" : Math.max(0, parseInt(value) || 0);
-    onChange(match.id, { homeScore: side === "home" ? val : bH, awayScore: side === "away" ? val : bA, extraTimeWinner: bet?.extraTimeWinner || "" });
+    onChange(match, { homeScore: side === "home" ? val : bH, awayScore: side === "away" ? val : bA, extraTimeWinner: bet?.extraTimeWinner || "" });
   };
 
   const handleExt = (value) => onChange(match.id, { ...bet, homeScore: bH, awayScore: bA, extraTimeWinner: value });
@@ -263,20 +263,29 @@ export default function Matches() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [bets, setBets] = useState(() => loadBets());
   const [saved, setSaved] = useState(false);
   const [dayBets, setDayBets] = useState([]);
 
   useEffect(() => {
-    console.log('Fetching matches...');
-    const fetchData = async () => {a
-      const data = await getMatches();
-      // console.log(data)
-      setMatches(data);
+    console.log("fetch data")
+    
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        const data = await getMatches();
+        setMatches(data || []);
+
+        console.log(data)
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();
-    setLoading(false);
+    // setLoading(false);
   }, []);
 
   const dates = useMemo(() => {
@@ -306,27 +315,55 @@ export default function Matches() {
 
   const handleDateChange = useCallback((date) => { setSelectedDate(date); setSaved(false); }, []);
 
-  const handleBetChange = useCallback((matchId, bet) => {
-    // console.log(123, bet)
-    const betObject = {
-      'matchId': matchId,
-      'homeScore': bet.homeScore,
-      'awayScore': bet.awayScore,
-      'extraTimeWinner': bet.extraTimeWinner
-    }
-    console.log(betObject)
-    setDayBets((prev) => ([ ...prev, betObject ]));
-    setSaved(false);
+  const handleBetChange = useCallback((match, bet) => {
+    // console.log(match)
 
-        // console.log('bet: ', bet);
+    const betObject = {
+      matchId: match.id,
+      matchUtcDate: match.utcDate,
+      matchStatus: match.status,
+      homeTeam: match.homeTeam,
+      awayTeam: match.awayTeam,
+      homeScore: bet.homeScore,
+      awayScore: bet.awayScore,
+      extraTimeWinner: bet.extraTimeWinner ?? "",
+    };
+
+    setDayBets((prev) => {
+      const existingIndex = prev.findIndex(
+        (b) => b.matchId === match.id
+      );
+
+      if (existingIndex >= 0) {
+        return prev.map((b) =>
+          b.matchId === match.id ? betObject : b
+        );
+      }
+
+      return [...prev, betObject];
+    });
+
+    setSaved(false);
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const updated = saveBetsForDay(dayBets);
 
-    console.log('bets to be saved', updated);
+    // console.log('bets to be saved', updated);
 
-    // saveBet(session.id, )
+    const arr = Object.values(updated);
+
+    // console.log('arr to be saved', arr)
+
+    console.log('session_id', session.id)
+    for (const bet of arr) {
+      const betRe = await saveBet(session.id, bet);
+      if (!betRe) {
+        setDayBets([])
+        toast.error("Nie mozna obstawic meczu ktory sie rozpoczal, pozdro.");
+        throw new Error("Nie mozna obstawic meczu ktory sie rozpoczal, pozdro.");
+      }
+    }
     
     setSaved(true);
     toast.success("Typy zapisane!");

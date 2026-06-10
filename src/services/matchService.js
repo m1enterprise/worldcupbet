@@ -12,3 +12,19 @@ export async function getMatches() {
     return data;
   }
 }
+
+export async function getMatchById(id){
+  const { data, error } = await supabase
+        .from('matches')
+        .select('*')
+        .eq('id', id)
+        .single();
+    
+      if (error) {
+        console.error(error);
+        return null;
+      }
+    
+      return data;
+}
+

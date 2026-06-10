@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { fetchStandings, fetchScorers } from "../lib/api";
 import { getSession, logout } from "../lib/auth";
-import { Trophy, CalendarDays, Table2, Star, BarChart3, RefreshCw, LogOut } from "lucide-react";
+import { Trophy, Table2, Star, BarChart3, RefreshCw, LogOut, LoaderPinwheel } from "lucide-react";
 
 // ─── Bottom Nav ───────────────────────────────────────────────────────────────
 function BottomNav() {
   const location = useLocation();
   const items = [
-    { path: "/", icon: CalendarDays, label: "Mecze" },
+    { path: "/", icon: LoaderPinwheel, label: "Mecze" },
     { path: "/standings", icon: Table2, label: "Tabele" },
     { path: "/my-bets", icon: Star, label: "Moje typy" },
     { path: "/points", icon: BarChart3, label: "Punkty" },
