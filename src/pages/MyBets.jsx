@@ -103,13 +103,14 @@ export default function MyBets() {
   useEffect(() => {
     // 2. get full match data for match.id === bet.id
     const fetchData = async () => {
-      const bet_data = await getBets();
-      if (!bet_data) return;
+      const bet_data = await getBets(session?.id);
+      if (!bet_data) return console.log('No user_bet data found');
+      console.log('bet_data: ', bet_data);
       const data = await getMatches();
-      if (!data) return;
-      const matchesFullBet = data.filter((match) => bet_data.some((bet) => bet.id === match.id));
+      if (!data) return console.log('No match data found');
+      const matchesFullBet = data.filter((match) => bet_data.bets.some((bet) => bet.id === match.id));
 
-      setUserBets(bet_data.user_bets);
+      setUserBets(bet_data.bets);
       setMatches(matchesFullBet);
 
       console.log(matchesFullBet)
@@ -190,7 +191,7 @@ export default function MyBets() {
           <div>
             <h2 className="font-display text-base font-bold mb-3 flex items-center gap-2">
               <Target className="w-5 h-5 text-primary" />
-              Postawione typy ({myBets.user_bets.length})
+              Postawione typy ({userBets.length})
             </h2>
 
             {userBets.length === 0 && (

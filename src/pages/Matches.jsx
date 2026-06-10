@@ -248,6 +248,8 @@ function MatchCard({ match, bet, onChange, disabled }) {
 
 import wcData from "../lib/wc_data.json"
 import { getMatches } from "../services/matchService";
+import { pushBet } from "../services/betService";
+import { saveBet } from "../services/betServiceMod";
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Matches() {
@@ -263,11 +265,13 @@ export default function Matches() {
   const [error, setError] = useState(null);
   const [bets, setBets] = useState(() => loadBets());
   const [saved, setSaved] = useState(false);
-  const [dayBets, setDayBets] = useState({});
+  const [dayBets, setDayBets] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    console.log('Fetching matches...');
+    const fetchData = async () => {a
       const data = await getMatches();
+      // console.log(data)
       setMatches(data);
     };
 
@@ -291,34 +295,48 @@ export default function Matches() {
   }, [dates]);
 
   const dayMatches = useMemo(() => matches?.filter((m) => m.utcDate?.slice(0, 10) === selectedDate), [matches, selectedDate]);
-  useEffect(() => {
-    if (!selectedDate) return;
-    const currentBets = loadBets();
-    const obj = {};
-    dayMatches?.forEach((m) => { if (currentBets[m.id]) obj[m.id] = currentBets[m.id]; });
-    setDayBets(obj);
-    setSaved(false);
-  }, [selectedDate, matches]);
+  // useEffect(() => {
+  //   if (!selectedDate) return;
+  //   const currentBets = loadBets();
+  //   const obj = {};
+  //   dayMatches?.forEach((m) => { if (currentBets[m.id]) obj[m.id] = currentBets[m.id]; });
+  //   setDayBets(obj);
+  //   setSaved(false);
+  // }, [selectedDate, matches]);
 
   const handleDateChange = useCallback((date) => { setSelectedDate(date); setSaved(false); }, []);
 
   const handleBetChange = useCallback((matchId, bet) => {
-    setDayBets((prev) => ({ ...prev, [matchId]: bet }));
+    // console.log(123, bet)
+    const betObject = {
+      'matchId': matchId,
+      'homeScore': bet.homeScore,
+      'awayScore': bet.awayScore,
+      'extraTimeWinner': bet.extraTimeWinner
+    }
+    console.log(betObject)
+    setDayBets((prev) => ([ ...prev, betObject ]));
     setSaved(false);
+
+        // console.log('bet: ', bet);
   }, []);
 
   const handleSave = () => {
     const updated = saveBetsForDay(dayBets);
 
-    console.log('updated bets', updated);
+    console.log('bets to be saved', updated);
 
-    setBets(updated);
+    // saveBet(session.id, )
+    
     setSaved(true);
     toast.success("Typy zapisane!");
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const hasBets = Object.keys(dayBets).some((id) => dayBets[id]?.homeScore !== "" && dayBets[id]?.homeScore !== undefined);
+  // const hasBets = Object.keys(dayBets).some((id) => dayBets[id]?.homeScore !== "" && dayBets[id]?.homeScore !== undefined);
+  const hasBets = dayBets.some(
+  (bet) => bet.homeScore != null && bet.homeScore !== ""
+);
 
   if (!session) return null;
 
@@ -357,7 +375,7 @@ export default function Matches() {
               <div className="px-4 space-y-3">
                 {dayMatches?.map((match) => (
                   // <div id={match.id} className="">{match.id}</div>
-                  <MatchCard key={match.id} match={match} bet={dayBets[match.id]} onChange={handleBetChange} disabled={match.status === "finished"} />
+                  <MatchCard key={match.id} match={match} bet={dayBets?.find((bet) => bet?.matchId === match?.id)} onChange={handleBetChange} disabled={match.status === "finished"} />
                 ))}
               </div>
 
