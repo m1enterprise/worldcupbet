@@ -145,11 +145,7 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
   const betExt = bet?.extraTimeWinner ?? "";
   const isBetDraw = bH !== "" && bA !== "" && parseInt(bH) === parseInt(bA);
 
-  const fetchedBet = fetchedBetData?.find((bet) => bet?.matchId === match?.id)
-  // console.log(fetchedBetData)
-  // console.log(1, fetchedBetData[0].matchId)
-  // console.log(2, match.id)
-  // console.log(148, fetchedBet)
+  const fetchedBet = fetchedBetData?.find((bet) => String(bet?.matchId) === String(match?.id))
 
   const handleScore = (side, value) => {
     const val = value === "" ? "" : Math.max(0, parseInt(value) || 0);
@@ -164,7 +160,7 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
   }
 
   return (
-    <div className={`bg-card rounded-2xl border border-border overflow-hidden transition-all ${isFinished ? "opacity-80" : "shadow-sm hover:shadow-md"}`}>
+    <div className={`relative bg-card rounded-2xl border border-border overflow-hidden transition-all ${isFinished ? "opacity-80" : "shadow-sm hover:shadow-md"}`}>
       <div className="flex items-center justify-between px-4 pt-3 pb-1">
         <div className="flex items-center gap-2">
           {match.group && <span className="text-[10px] font-bold px-2 py-0.5 bg-secondary text-secondary-foreground rounded-full">Gr. {match.group.slice(-1)}</span>}
@@ -193,20 +189,15 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
           </div>
         </div>
 
-        <div className="div">
+        
           {fetchedBet && (
-          <div className="flex items-center gap-1">
-                          <span className="text-muted-foreground font-bold">Twój typ z bazy na ten mecz to:</span>
-              <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
-                <span className="text-lg font-bold">{fetchedBet.homeScore}</span>
-              </div>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 flex items-center gap-1">
+                          <span className="text-muted-foreground font-bold">Mecz obstawiony</span>
+              <span className="text-lg font-bold">{fetchedBet.homeScore}</span>
               <span className="text-muted-foreground font-bold">:</span>
-              <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
-                <span className="text-lg font-bold">{fetchedBet.awayScore}</span>
-              </div>
+              <span className="text-lg font-bold">{fetchedBet.awayScore}</span>
             </div>
           )}
-        </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
           {isFinished ? (

@@ -77,7 +77,7 @@ export default function Register() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   autoFocus
-                  placeholder="np. jankowalski"
+                  placeholder="np. Jerycho"
                   className="w-full pl-10 pr-4 h-12 rounded-xl bg-background border border-border text-sm font-medium placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                 />
               </div>
