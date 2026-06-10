@@ -154,7 +154,7 @@ function SearchablePicker({ options, value, onChange, placeholder }) {
 // import myBets from "../lib/my_bets.json";
 // import wcData from "../lib/wc_data.json";
 import { getMatches } from "../services/matchService";
-import { getBets, getBetsByUserId, pushBonusBet } from "../services/betService";
+import { getBets, getBetsByUserId, getBonusBetByUserId, pushBonusBet } from "../services/betService";
 
 export default function MyBets() {
   const navigate = useNavigate();
@@ -164,8 +164,9 @@ export default function MyBets() {
 
   const [matches, setMatches] = useState([]);
   const [userBets, setUserBets] = useState([]);
-  const [bonusBets, setBonusBets] = useState(() => loadBonusBets());
+  const [bonusBets, setBonusBets] = useState({});
   const bets = useMemo(() => loadBets(), []);
+  const [fetchedBonusData, setFetchedBonusData] = useState([])
 
     // Teams list sorted alphabetically
   const teamOptions = useMemo(() => {
@@ -212,8 +213,25 @@ export default function MyBets() {
       if (!data) return console.log('No match data found');
       const matchesFullBet = data.filter((match) => bet_data.some((bet) => bet.id === match.id));
 
+      // BONUS BET BY USER ID
+      const bonus_arr = await getBonusBetByUserId(session?.id)
+      const bonus_data = bonus_arr[0]
+      if (!bonus_data) return console.log('No user_bet data found');
+      console.log('bonus_data: ', bonus_data);
+      //champtio
+      //topScorer
+      setBonusBets({
+        champion: bonus_data.bonusChampion,
+        topScorer: bonus_data.bonusScorer
+      })
+      console.log({
+        champion: bonus_data.bonusChampion,
+        topScorer: bonus_data.bonusScorer
+      })
+
       setUserBets(bet_data);
       setMatches(matchesFullBet);
+      setFetchedBonusData(bonus_data)
 
       // console.log(matchesFullBet)
       // console.log(bet_data);
