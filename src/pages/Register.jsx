@@ -55,9 +55,8 @@ export default function Register() {
         <div className="flex flex-col items-center mb-8">
           <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mb-3 shadow-lg shadow-primary/25">
             <Trophy className="w-8 h-8 text-primary-foreground" />
-          </div>
-          <h1 className="text-2xl font-display font-bold">World Cup 2026</h1>
-          <p className="text-sm text-muted-foreground mt-1">Utwórz konto typera</p>
+          </div> <h1 className="font-display text-lg font-bold leading-tight">Essa Bet</h1>
+          <p className="text-xs text-secondary-foreground/60 font-medium">Stworz konto typera </p>
         </div>
 
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
