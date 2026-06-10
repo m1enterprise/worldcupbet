@@ -88,7 +88,7 @@ function Header({ username }) {
 // import myBets from "../lib/my_bets.json";
 // import wcData from "../lib/wc_data.json";
 import { getMatches } from "../services/matchService";
-import { getBets } from "../services/betService";
+import { getBets, getBetsByUserId } from "../services/betService";
 
 export default function MyBets() {
   const navigate = useNavigate();
@@ -104,18 +104,22 @@ export default function MyBets() {
   useEffect(() => {
     // 2. get full match data for match.id === bet.id
     const fetchData = async () => {
-      const bet_data = await getBets(session?.id);
+      // BETS BY USER ID
+      const bet_data = await getBetsByUserId(session?.id);
       if (!bet_data) return console.log('No user_bet data found');
       console.log('bet_data: ', bet_data);
+
+      // ALL MATCHES
       const data = await getMatches();
       if (!data) return console.log('No match data found');
-      const matchesFullBet = data.filter((match) => bet_data.bets.some((bet) => bet.id === match.id));
+      const matchesFullBet = data.filter((match) => bet_data.some((bet) => bet.id === match.id));
 
-      setUserBets(bet_data.bets);
+      setUserBets(bet_data);
       setMatches(matchesFullBet);
 
-      console.log(matchesFullBet)
-      console.log(bet_data);
+      // console.log(matchesFullBet)
+      // console.log(bet_data);
+      console.log(122, bet_data?.length === 0 ? '0' : '>')
     };
     fetchData();
   }, []);
@@ -192,15 +196,15 @@ export default function MyBets() {
           <div>
             <h2 className="font-display text-base font-bold mb-3 flex items-center gap-2">
               <Target className="w-5 h-5 text-primary" />
-              Postawione typy ({userBets.length})
+              Postawione typy ({userBets?.length})
             </h2>
 
-            {userBets.length === 0 && (
+            {/* {userBets?.length === 0 && (
               <div className="bg-card rounded-2xl border border-border p-8 text-center">
                 <p className="text-muted-foreground text-sm">Nie postawiłeś jeszcze żadnych typów.</p>
                 <p className="text-muted-foreground text-xs mt-1">Przejdź do zakładki „Mecze" aby obstawiać.</p>
               </div>
-            )}
+            )} */}
 
             {/* {userBets.length > 0 && (
               <div className="space-y-4">
@@ -249,7 +253,7 @@ export default function MyBets() {
             )} */}
 
 
-    {matches.length === 0 ? (
+    {userBets.length === 0 ? (
           <div className="bg-card rounded-2xl border border-border p-8 text-center">
             <p className="text-muted-foreground text-sm">
               Nie postawiłeś jeszcze żadnych typów.
@@ -260,7 +264,7 @@ export default function MyBets() {
           </div>
         ) : (
           <div className="space-y-2">
-            {matches.map((match) => {
+            {userBets.map((match) => {
               
               const isFinished = match.status === "finished";
               let pointsInfo = null;
@@ -280,7 +284,7 @@ export default function MyBets() {
                 >
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-[10px] text-muted-foreground font-medium">
-                      {format(parseISO(match.utcDate), "d MMM", { locale: pl })} •{" "}
+                      {format(parseISO(match.matchUtcDate), "d MMM", { locale: pl })} •{" "}
                       {match.group
                         ? `Gr. ${match.group.slice(-1)}`
                         : PHASE_NAMES[match.phase]}
@@ -314,7 +318,7 @@ export default function MyBets() {
                       {match.homeTeam.name}
                     </span>
                     <span className="text-sm font-bold bg-muted rounded-lg px-2.5 py-1">
-                      {match.homeTeam.score || '?'} : {match.awayScore || '?'}
+                      {match.homeScore || '?'} : {match.awayScore || '?'}
                     </span>
                     <span className="text-xs font-semibold flex-1 truncate text-right">
                       {match.awayTeam.name}
