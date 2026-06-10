@@ -4,7 +4,7 @@ import { fetchMatches } from "../lib/api";
 import { loadBets, saveBetsForDay, getSession, logout } from "../lib/auth";
 import { format, parseISO, isToday, isTomorrow } from "date-fns";
 import { pl } from "date-fns/locale";
-import { Trophy, Table2, Star, BarChart3, Save, CheckCircle2, RefreshCw, LogOut, LoaderPinwheel} from "lucide-react";
+import { Trophy, Table2, Star, BarChart3, Save, CheckCircle2, RefreshCw, LogOut, LoaderPinwheel, Users} from "lucide-react";
 import { toast } from "sonner";
 
 // ─── Scoring Engine ───────────────────────────────────────────────────────────
@@ -54,6 +54,7 @@ function BottomNav() {
     { path: "/standings", icon: Table2, label: "Tabele" },
     { path: "/my-bets", icon: Star, label: "Moje typy" },
     { path: "/points", icon: BarChart3, label: "Punkty" },
+    { path: "/ranking", icon: Users, label: "Ranking" },
   ];
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border">
@@ -83,7 +84,7 @@ function Header({ username }) {
           <Trophy className="w-5 h-5 text-primary-foreground" />
         </div>
         <div className="flex-1">
-          <h1 className="font-display text-lg font-bold leading-tight">Skibidi Essa Bet</h1>
+          <h1 className="font-display text-lg font-bold leading-tight">Essa Bet</h1>
           <p className="text-xs text-secondary-foreground/60 font-medium">World Cup 2026 v1.2</p>
         </div>
         {username && (
@@ -135,14 +136,20 @@ function DaySelector({ dates, selectedDate, onSelect }) {
 }
 
 // ─── Match Card ───────────────────────────────────────────────────────────────
-function MatchCard({ match, bet, onChange, disabled }) {
+function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
   const isKnockout = match.stage !== "GROUP_STAGE";
-  const isFinished = match.status === "finished";
+  const isFinished = match.status === "FINISHED";
 
   const bH = bet?.homeScore ?? "";
   const bA = bet?.awayScore ?? "";
   const betExt = bet?.extraTimeWinner ?? "";
   const isBetDraw = bH !== "" && bA !== "" && parseInt(bH) === parseInt(bA);
+
+  const fetchedBet = fetchedBetData?.find((bet) => bet?.matchId === match?.id)
+  console.log(fetchedBetData)
+  console.log(1, fetchedBetData[0].matchId)
+  console.log(2, match.id)
+  console.log(148, fetchedBet)
 
   const handleScore = (side, value) => {
     const val = value === "" ? "" : Math.max(0, parseInt(value) || 0);
@@ -170,7 +177,7 @@ function MatchCard({ match, bet, onChange, disabled }) {
               {pointsInfo.points > 0 ? "+" : ""}{pointsInfo.points} pkt
             </span>
           )}
-          <span className="text-[11px] text-muted-foreground font-medium">{match.time}</span>
+          <span className="text-[11px] text-muted-foreground font-medium">{match.utcDate.slice(-9, -4)}</span>
         </div>
       </div>
 
@@ -184,6 +191,21 @@ function MatchCard({ match, bet, onChange, disabled }) {
             <p className="text-sm font-bold truncate">{match.homeTeam.name}</p>
             <p className="text-[10px] text-muted-foreground font-medium">{match.homeTeam.tla}</p>
           </div>
+        </div>
+
+        <div className="div">
+          {fetchedBet && (
+          <div className="flex items-center gap-1">
+                          <span className="text-muted-foreground font-bold">Twój typ z bazy na ten mecz to:</span>
+              <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
+                <span className="text-lg font-bold">{fetchedBet.homeScore}</span>
+              </div>
+              <span className="text-muted-foreground font-bold">:</span>
+              <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
+                <span className="text-lg font-bold">{fetchedBet.awayScore}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
@@ -248,8 +270,9 @@ function MatchCard({ match, bet, onChange, disabled }) {
 
 import wcData from "../lib/wc_data.json"
 import { getMatches } from "../services/matchService";
-import { pushBet } from "../services/betService";
-import { saveBet } from "../services/betServiceMod";
+// import { pushBet } from "../services/betService";
+import { getUserBets, saveBet } from "../services/betServiceMod";
+import { getBetsByUserId } from "../services/betService";
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Matches() {
@@ -265,6 +288,7 @@ export default function Matches() {
   const [error, setError] = useState(null);
   const [saved, setSaved] = useState(false);
   const [dayBets, setDayBets] = useState([]);
+  const [fetchedBetData, setFetchedBetData] = useState([])
 
   useEffect(() => {
     console.log("fetch data")
@@ -276,7 +300,12 @@ export default function Matches() {
         const data = await getMatches();
         setMatches(data || []);
 
-        console.log(data)
+        const betData = await getBetsByUserId(session.id)
+        setFetchedBetData(betData || [])
+
+        console.log(302, betData)
+        console.log(303, betData?.find((bet) => bet?.matchId === '130'))
+
       } catch (err) {
         setError(err.message);
       } finally {
@@ -368,7 +397,7 @@ export default function Matches() {
     setSaved(true);
     toast.success("Typy zapisane!");
     setTimeout(() => setSaved(false), 2000);
-  };
+    };
 
   // const hasBets = Object.keys(dayBets).some((id) => dayBets[id]?.homeScore !== "" && dayBets[id]?.homeScore !== undefined);
   const hasBets = dayBets.some(
@@ -412,7 +441,7 @@ export default function Matches() {
               <div className="px-4 space-y-3">
                 {dayMatches?.map((match) => (
                   // <div id={match.id} className="">{match.id}</div>
-                  <MatchCard key={match.id} match={match} bet={dayBets?.find((bet) => bet?.matchId === match?.id)} onChange={handleBetChange} disabled={match.status === "finished"} />
+                  <MatchCard key={match.id} match={match} bet={dayBets?.find((bet) => bet?.matchId === match?.id)} fetchedBetData={fetchedBetData} onChange={handleBetChange} disabled={match.status === "finished"} />
                 ))}
               </div>
 

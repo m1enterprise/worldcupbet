@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
-import { getSession, logout } from "@/lib/auth";
+import { getSession, logout } from "../lib/auth";
+// import { fetchMatches } from "@/lib/api";
+import { calcPointsForAllUsers } from "../services/calcPointsService";
 import { Trophy, Table2, Star, BarChart3, Medal, RefreshCw, LogOut, Users, LoaderPinwheel } from "lucide-react";
+import { getBets } from "../services/betService";
+import { getUsers } from "../services/userService";
+import { getMatches } from "../services/matchService";
 
 function BottomNav() {
   const location = useLocation();
@@ -63,17 +67,104 @@ export default function Ranking() {
 
   useEffect(() => { if (!session) navigate("/login"); }, []);
 
-  const [players, setPlayers] = useState([]);
+  const [allBets, setAllBets] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.entities.PlayerScore.list("-total_points", 100)
-      .then(setPlayers)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    // try{
+    //   // Pobierz WSZYSTKIE bety (wszystkich userów) - admin może widzieć wszystkie
+    //    const bets = await getBets()
+    //   // Pobierz listę userów (do mapowania userId → username)
+    //     setAllBets(bets);
+    //     setAllUsers(users);
+    //     setMatches(apiMatches);
+
+    //   // Pobierz mecze z API
+    //   fetchMatches(),
+    // } catch(() => {})
+      
+    // finally(() => setLoading(false));
+
+    const fetchData = async () => {
+          try {
+            setLoading(true);
+            
+            // Pobierz WSZYSTKIE bety (wszystkich userów) - admin może widzieć wszystkie
+            const bets = await getBets()
+            
+            // Pobierz listę userów (do mapowania userId → username)
+            const users = await getUsers()
+            
+            // Pobierz mecze z API
+            const matches = await getMatches()
+
+            setAllBets(bets);
+            setAllUsers(users);
+            setMatches(matches);
+    
+          } catch (err) {
+            setError(err.message);
+          } finally {
+            setLoading(false);
+          }
+        };
+    
+        fetchData();
   }, []);
 
-  const myRank = players.findIndex(p => p.username === session?.username) + 1;
+  // Konwertuj mecze z formatu lokalnego API do formatu football-data.org
+  // (calcPointsForAllUsers oczekuje: id, status, stage, score.fullTime.home/away, score.duration, score.winner)
+  const normalizedMatches = useMemo(() => {
+    return matches.map((m) => ({
+      id: String(m.id),
+      status: m.status === "finished" ? "FINISHED" : m.status?.toUpperCase() ?? "SCHEDULED",
+      stage: m.phase === "group" ? "GROUP_STAGE" :
+             m.phase === "round_of_32" ? "ROUND_OF_32" :
+             m.phase === "round_of_16" ? "ROUND_OF_16" :
+             m.phase === "quarter_final" ? "QUARTER_FINALS" :
+             m.phase === "semi_final" ? "SEMI_FINALS" :
+             m.phase === "third_place" ? "THIRD_PLACE" :
+             m.phase === "final" ? "FINAL" : "GROUP_STAGE",
+      score: {
+        winner: m.homeScore != null && m.awayScore != null
+          ? m.homeScore > m.awayScore ? "HOME_TEAM"
+            : m.awayScore > m.homeScore ? "AWAY_TEAM"
+            : m.extraTimeWinner === "home" ? "HOME_TEAM"
+            : m.extraTimeWinner === "away" ? "AWAY_TEAM"
+            : "DRAW"
+          : null,
+        duration: m.extraTimeWinner ? "EXTRA_TIME" : "REGULAR",
+        fullTime: {
+          home: m.homeScore,
+          away: m.awayScore,
+        },
+      },
+    }));
+  }, [matches]);
+
+  // Oblicz ranking przy użyciu calc_points_service
+  const ranking = useMemo(() => {
+    if (!allBets.length || !normalizedMatches.length) return [];
+
+    const calcResults = calcPointsForAllUsers(allBets, normalizedMatches);
+
+    // Mapuj userId → username
+    const userMap = {};
+    allUsers.forEach((u) => { userMap[u.id] = u.username || u.email || u.id; });
+
+    console.log(157, userMap)
+
+    return calcResults.map((entry) => ({
+      ...entry,
+      username: userMap[entry.userId] || entry.userId,
+      isMe: entry.userId === session?.userId,
+    }));
+  }, [allBets, normalizedMatches, allUsers, session]);
+
+  // Znajdź pozycję zalogowanego usera
+  const myRank = ranking.findIndex((p) => p.isMe) + 1;
 
   if (!session) return null;
 
@@ -97,7 +188,7 @@ export default function Ranking() {
               </div>
               <div className="text-right">
                 <p className="text-secondary-foreground/60 text-xs font-semibold uppercase tracking-wider">Graczy</p>
-                <p className="text-4xl font-display font-black text-secondary-foreground">{players.length}</p>
+                <p className="text-4xl font-display font-black text-secondary-foreground">{ranking.length}</p>
               </div>
             </div>
           </div>
@@ -114,31 +205,29 @@ export default function Ranking() {
                 <RefreshCw className="w-6 h-6 text-primary animate-spin" />
                 <p className="text-sm text-muted-foreground">Ładowanie rankingu...</p>
               </div>
-            ) : players.length === 0 ? (
+            ) : ranking.length === 0 ? (
               <div className="py-12 text-center text-sm text-muted-foreground px-4">
                 <p className="font-semibold mb-1">Brak danych</p>
-                <p className="text-xs">Żaden gracz nie zsynchronizował jeszcze swoich punktów. Zapisz typy na stronie Mecze!</p>
+                <p className="text-xs">Żaden gracz nie postawił jeszcze żadnych typów na zakończone mecze.</p>
               </div>
             ) : (
               <div className="divide-y divide-border">
                 {/* Header row */}
-                <div className="grid grid-cols-[32px_1fr_52px_52px_52px_52px] gap-1 px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                <div className="grid grid-cols-[32px_1fr_52px_52px_52px] gap-1 px-4 py-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                   <span>#</span>
                   <span>Gracz</span>
                   <span className="text-center">Pkt</span>
-                  <span className="text-center">Typy</span>
                   <span className="text-center">Trafne</span>
                   <span className="text-center">Dokł.</span>
                 </div>
-                {players.map((player, idx) => {
-                  const isMe = player.username === session?.username;
+                {ranking.map((player, idx) => {
                   const accuracy = player.bets_placed > 0
-                    ? Math.round((player.bets_correct / player.bets_placed) * 100)
+                    ? Math.round((player.trafione_wyniki / player.bets_placed) * 100)
                     : 0;
                   return (
-                    <div key={player.id}
-                      className={`grid grid-cols-[32px_1fr_52px_52px_52px_52px] gap-1 px-4 py-3 items-center transition-colors
-                        ${isMe ? "bg-primary/5 border-l-2 border-primary" : ""}
+                    <div key={player.userId}
+                      className={`grid grid-cols-[32px_1fr_52px_52px_52px] gap-1 px-4 py-3 items-center transition-colors
+                        ${player.isMe ? "bg-primary/5 border-l-2 border-primary" : ""}
                         ${idx < 3 ? MEDAL_BG[idx] : ""}
                       `}>
                       <div className="flex items-center justify-center">
@@ -149,18 +238,17 @@ export default function Ranking() {
                         )}
                       </div>
                       <div className="min-w-0">
-                        <p className={`text-sm font-bold truncate ${isMe ? "text-primary" : ""}`}>
+                        <p className={`text-sm font-bold truncate ${player.isMe ? "text-primary" : ""}`}>
                           {player.username}
-                          {isMe && <span className="ml-1.5 text-[10px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">Ty</span>}
+                          {player.isMe && <span className="ml-1.5 text-[10px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">Ty</span>}
                         </p>
                         <p className="text-[10px] text-muted-foreground">{accuracy}% trafność</p>
                       </div>
                       <span className={`text-base font-bold text-center ${idx === 0 ? "text-yellow-500" : idx === 1 ? "text-slate-400" : idx === 2 ? "text-amber-600" : "text-foreground"}`}>
-                        {player.total_points}
+                        {player.zdobyte_punkty}
                       </span>
-                      <span className="text-xs text-center text-muted-foreground font-medium">{player.bets_placed}</span>
-                      <span className="text-xs text-center text-green-600 font-medium">{player.bets_correct}</span>
-                      <span className="text-xs text-center text-primary font-medium">{player.exact_scores}</span>
+                      <span className="text-xs text-center text-green-600 font-medium">{player.trafione_wyniki}</span>
+                      <span className="text-xs text-center text-primary font-medium">{player.dokladnie_trafione_wyniki}</span>
                     </div>
                   );
                 })}
@@ -170,12 +258,14 @@ export default function Ranking() {
 
           {/* Legend */}
           <div className="bg-card rounded-2xl border border-border p-4">
-            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Legenda kolumn</h3>
+            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Legenda punktacji</h3>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-foreground">Pkt</span><span className="text-muted-foreground">Łączne punkty</span></div>
-              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-foreground">Typy</span><span className="text-muted-foreground">Postawione typy</span></div>
-              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-green-600">Trafne</span><span className="text-muted-foreground">Trafione wyniki</span></div>
-              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-primary">Dokł.</span><span className="text-muted-foreground">Dokładne wyniki (5+ pkt)</span></div>
+              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-yellow-500">5</span><span className="text-muted-foreground">Dokładny wynik (gr.)</span></div>
+              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-green-600">3</span><span className="text-muted-foreground">Trafiony zwycięzca</span></div>
+              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-primary">7</span><span className="text-muted-foreground">Remis + dogrywka (dokł.)</span></div>
+              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-primary">5</span><span className="text-muted-foreground">Remis + dogrywka</span></div>
+              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-muted-foreground">2</span><span className="text-muted-foreground">Trafiony zwycięzca ET</span></div>
+              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-primary">10</span><span className="text-muted-foreground">Bonus (mistrz / król)</span></div>
             </div>
           </div>
         </div>

@@ -10,6 +10,7 @@ import Standings from "./pages/Standings";
 import MyBets from "./pages/MyBets";
 import Points from "./pages/Points";
 import Service from "./pages/Service";
+import Ranking from "./pages/Ranking";
 
 function RequireAuth({ children }) {
   return isLoggedIn() ? children : <Navigate to="/login" replace />;
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/standings" element={<RequireAuth><Standings /></RequireAuth>} />
         <Route path="/my-bets" element={<RequireAuth><MyBets /></RequireAuth>} />
         <Route path="/points" element={<RequireAuth><Points /></RequireAuth>} />
+        <Route path="/ranking" element={<RequireAuth><Ranking /></RequireAuth>} />
         <Route path="/service" element={<RequireAuth><Service /></RequireAuth>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

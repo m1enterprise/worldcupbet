@@ -97,6 +97,8 @@ console.log('went after canBet check - bet valid')
   // Sprawdź czy bet już istnieje dla tego meczu
   const existing = await getBetForMatch(userId, betData.matchId);
 
+  console.log(100)
+
   if (existing) {
     // return await base44.entities.Bet.update(existing.id, payload);
     const { data, error } = await supabase
@@ -111,9 +113,10 @@ console.log('went after canBet check - bet valid')
         console.log(error)
         return null
       } else {
-        return(data[0]);
+            console.log(200)
+            console.log(data)
+        return(data);
       }
-
   } else {
     // return await base44.entities.Bet.create(payload);
     const { data, error } = await supabase
@@ -121,15 +124,20 @@ console.log('went after canBet check - bet valid')
         .insert([
           payload
         ])
-        .select();
+        .select()
+        .single();
     
       if (error) {
         console.log(error)
         return null
       } else {
-        return(data[0]);
+            console.log(300)
+
+        return(data);
       }
   }
+
+  
 }
 
 /**
@@ -138,8 +146,22 @@ console.log('went after canBet check - bet valid')
  * 
  * @returns {Array} lista betów
  */
-export async function getUserBets() {
-  return await base44.entities.Bet.list("-created_date", 500);
+export async function getUserBets(userId) {
+//   return await base44.entities.Bet.list("-created_date", 500);
+   const { data, error } = await supabase
+        .from('bets')
+        .select('*')
+        .eq('userId', userId)
+        .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    return null;
+  } else {
+    console.log('bets: ', data)
+    return data;
+  }
+
 }
 
 /**

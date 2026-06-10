@@ -35,3 +35,16 @@ export async function userLogin(username, password) {
 
   return data;
 }
+
+export async function getUsers() {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  return data;
+}

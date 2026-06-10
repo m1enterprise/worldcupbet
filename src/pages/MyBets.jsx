@@ -4,7 +4,7 @@ import { fetchMatches } from "../lib/api";
 import { loadBets, loadBonusBets, saveBonusBets, getSession, logout } from "../lib/auth";
 import { format, parseISO } from "date-fns";
 import { pl } from "date-fns/locale";
-import { Trophy, Table2, Star, BarChart3, Save, LogOut, Target, LoaderPinwheel } from "lucide-react";
+import { Trophy, Table2, Star, BarChart3, Save, LogOut, Target, LoaderPinwheel, Users } from "lucide-react";
 import { toast } from "sonner";
 
 const PHASE_NAMES = {
@@ -42,6 +42,7 @@ function BottomNav() {
     { path: "/standings", icon: Table2, label: "Tabele" },
     { path: "/my-bets", icon: Star, label: "Moje typy" },
     { path: "/points", icon: BarChart3, label: "Punkty" },
+    { path: "/ranking", icon: Users, label: "Ranking" },
   ];
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border">
@@ -70,8 +71,8 @@ function Header({ username }) {
           <Trophy className="w-5 h-5 text-primary-foreground" />
         </div>
         <div className="flex-1">
-          <h1 className="font-display text-lg font-bold leading-tight">World Cup 2026</h1>
-          <p className="text-xs text-secondary-foreground/60 font-medium">Typer turniejowy</p>
+          <h1 className="font-display text-lg font-bold leading-tight">Essa Bet</h1>
+          <p className="text-xs text-secondary-foreground/60 font-medium">World Cup 2026 v1.2</p>
         </div>
         {username && (
           <button onClick={handleLogout} className="flex items-center gap-1.5 text-xs text-secondary-foreground/60 hover:text-secondary-foreground transition-colors">
