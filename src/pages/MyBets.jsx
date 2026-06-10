@@ -4,8 +4,9 @@ import { fetchMatches } from "../lib/api";
 import { loadBets, loadBonusBets, saveBonusBets, getSession, logout } from "../lib/auth";
 import { format, parseISO } from "date-fns";
 import { pl } from "date-fns/locale";
-import { Trophy, Table2, Star, BarChart3, Save, LogOut, Target, LoaderPinwheel, Users } from "lucide-react";
+import { Trophy, Table2, Star, BarChart3, Save, LogOut, Target, LoaderPinwheel, Users, Search } from "lucide-react";
 import { toast } from "sonner";
+import { TEAMS, TOP_SCORERS } from "../lib/matchData";
 
 const PHASE_NAMES = {
   group: "Faza grupowa", round_of_32: "1/16 finału", round_of_16: "1/8 finału",
@@ -85,10 +86,75 @@ function Header({ username }) {
   );
 }
 
+// Searchable dropdown list picker
+function SearchablePicker({ options, value, onChange, placeholder }) {
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+
+  const filtered = useMemo(() => {
+    if (!query) return options;
+    return options.filter((o) =>
+      o.label.toLowerCase().includes(query.toLowerCase())
+    );
+  }, [options, query]);
+
+  const selected = options.find((o) => o.value === value);
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => { setOpen((v) => !v); setQuery(""); }}
+        className="w-full h-11 rounded-xl border border-border bg-background text-sm px-3 text-left flex items-center justify-between focus:outline-none focus:border-primary transition-colors"
+      >
+        {selected ? (
+          <span className="font-medium">{selected.label}</span>
+        ) : (
+          <span className="text-muted-foreground">{placeholder}</span>
+        )}
+        <span className="text-muted-foreground text-xs">▼</span>
+      </button>
+
+      {open && (
+        <div className="absolute z-50 left-0 right-0 top-12 bg-card border border-border rounded-xl shadow-xl overflow-hidden">
+          <div className="p-2 border-b border-border">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+              <input
+                autoFocus
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Szukaj..."
+                className="w-full pl-8 pr-3 h-8 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-primary"
+              />
+            </div>
+          </div>
+          <div className="max-h-56 overflow-y-auto">
+            {filtered.length === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-4">Brak wyników</p>
+            ) : (
+              filtered.map((o) => (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => { onChange(o.value); setOpen(false); setQuery(""); }}
+                  className={`w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors flex items-center gap-2 ${o.value === value ? "bg-primary/10 text-primary font-semibold" : ""}`}
+                >
+                  {o.label}
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // import myBets from "../lib/my_bets.json";
 // import wcData from "../lib/wc_data.json";
 import { getMatches } from "../services/matchService";
-import { getBets, getBetsByUserId } from "../services/betService";
+import { getBets, getBetsByUserId, pushBonusBet } from "../services/betService";
 
 export default function MyBets() {
   const navigate = useNavigate();
@@ -100,6 +166,38 @@ export default function MyBets() {
   const [userBets, setUserBets] = useState([]);
   const [bonusBets, setBonusBets] = useState(() => loadBonusBets());
   const bets = useMemo(() => loadBets(), []);
+
+    // Teams list sorted alphabetically
+  const teamOptions = useMemo(() => {
+    return Object.values(TEAMS)
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((t) => ({ value: t.code, label: `${t.flag} ${t.name}` }));
+  }, []);
+
+  // Players list sorted by team flag + name
+  const playerOptions = useMemo(() => {
+    return TOP_SCORERS
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((p) => {
+        const team = TEAMS[p.team];
+        return { value: p.name, label: `${team?.flag ?? ""} ${p.name} (${team?.name ?? p.team})` };
+      });
+  }, []);
+
+  const handleBonusChange = (key, value) => setBonusBets((prev) => ({ ...prev, [key]: value }));
+
+  const saveBonuses = async () => {
+    const bonusData = {
+      "bonusUserId": session.id,
+      "bonusChampion": bonusBets.champion,
+      "bonusScorer": bonusBets.topScorer
+    }
+
+        console.log(192, bonusData)
+    const data = await pushBonusBet(session.id, bonusData)
+    if (!data) return toast.error("Bonus nie zostal dodany / zmieniony.")
+    toast.success("Bonusy zapisane!");
+  };
 
   useEffect(() => {
     // 2. get full match data for match.id === bet.id
@@ -171,24 +269,32 @@ export default function MyBets() {
             </div>
             <div className="p-4 space-y-4">
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Mistrz Świata</label>
-                <select value={bonusBets.champion || ""} onChange={(e) => handleBonusChange("champion", e.target.value)}
-                  className="w-full h-11 rounded-xl border border-border bg-background text-sm px-3 focus:outline-none focus:border-primary">
-                  <option value="">Wybierz drużynę...</option>
-                  {/* {teamOptions?.map((t) => (
-                    <option key={t.code} value={t.code}>{t.flag} {t.name}</option>
-                  ))} */}
-                </select>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
+                  🏆 Mistrz Świata
+                </label>
+                <SearchablePicker
+                  options={teamOptions}
+                  value={bonusBets.champion || ""}
+                  onChange={(val) => handleBonusChange("champion", val)}
+                  placeholder="Wybierz drużynę..."
+                />
               </div>
+
               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">Król strzelców</label>
-                <input value={bonusBets.topScorer || ""} onChange={(e) => handleBonusChange("topScorer", e.target.value)}
-                  placeholder="Imię i nazwisko..."
-                  className="w-full h-11 rounded-xl border border-border bg-background text-sm px-3 focus:outline-none focus:border-primary" />
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
+                  👟 Król Strzelców
+                </label>
+                <SearchablePicker
+                  options={playerOptions}
+                  value={bonusBets.topScorer || ""}
+                  onChange={(val) => handleBonusChange("topScorer", val)}
+                  placeholder="Wybierz zawodnika..."
+                />
               </div>
-              {/* <button onClick={saveBonuses} className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors">
-                <Save className="w-4 h-4" />Zapisz bonusy
-              </button> */}
+
+              <button onClick={saveBonuses} className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors">
+                <Save className="w-4 h-4" /> Zapisz bonusy
+              </button>
             </div>
           </div>
 

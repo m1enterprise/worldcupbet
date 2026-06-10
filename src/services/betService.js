@@ -28,3 +28,77 @@ export async function getBetsByUserId(userId) {
     return data;
 }
 }
+
+export async function pushBonusBet(userId, bonusBet) {
+  // only if before 1 match
+  // '2026-06-11T19:00:00Z'
+  const now = new Date();
+  const ctf = new Date('2026-06-11T19:00:00Z');
+  console.log(now)
+  console.log(ctf)
+  console.log(now<ctf)
+  if (now > ctf) {
+    return null
+  }
+
+  console.log('before match')
+
+    const { data, error } = await supabase
+      .from('bonusbets')
+      .select('*')
+      .eq('bonusUserId', userId)
+      .single();
+
+    const existing = data ? true : null
+
+    if (existing) {
+    // return await base44.entities.Bet.update(existing.id, payload);
+    const { data, error } = await supabase
+        .from("bonusbets")
+        .update(bonusBet)
+        .eq("bonusUserId", userId)
+        .select()
+        .single();
+    
+      if (error) {
+        console.log(error)
+        return null
+      } else {
+            console.log(200)
+            console.log(data)
+        return(data);
+      }
+  } else {
+    // return await base44.entities.Bet.create(payload);
+    const { data, error } = await supabase
+        .from('bonusbets')
+        .insert(bonusBet)
+        .select()
+        .single();
+    
+      if (error) {
+        console.log(error)
+        return null
+      } else {
+            console.log(300)
+
+        return(data);
+      }
+  }
+  
+}
+
+export async function getBonusBetByUserId(userId) {
+  const { data, error } = await supabase
+        .from('bonusbets')
+        .select('*')
+        .eq('bonusUserId', userId)
+
+  if (error) {
+    console.error(error);
+    return null;
+  } else {
+    console.log('bets: ', data)
+    return data;
+}
+}

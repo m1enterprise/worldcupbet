@@ -51,5 +51,5 @@ export function loadBonusBets() {
 }
 
 export function saveBonusBets(bonus) {
-  localStorage.setItem(BONUS_KEY, JSON.stringify(bonus));
+  // localStorage.setItem(BONUS_KEY, JSON.stringify(bonus));
 }
