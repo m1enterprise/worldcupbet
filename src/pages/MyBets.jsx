@@ -228,7 +228,6 @@ export default function MyBets() {
         champion: bonus_data.bonusChampion,
         topScorer: bonus_data.bonusScorer
       })
-
       setUserBets(bet_data);
       setMatches(matchesFullBet);
       setFetchedBonusData(bonus_data)
