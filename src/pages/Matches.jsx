@@ -140,6 +140,16 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
   const isKnockout = match.stage !== "GROUP_STAGE";
   const isFinished = match.status === "FINISHED";
 
+  const now = new Date();
+  const ctf = new Date(match.utcDate);
+  console.log(now)
+  console.log(ctf)
+  // if (now > ctf) {
+  //   return null
+  // }
+  const canBet = now < ctf
+  console.log(canBet)
+
   const bH = bet?.homeScore ?? "";
   const bA = bet?.awayScore ?? "";
   const betExt = bet?.extraTimeWinner ?? "";
@@ -192,7 +202,7 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
           {fetchedBet && (
           <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1">
               <span className="text-[11px] text-muted-foreground font-medium">Mecz obstawiony</span>
-              
+
               <span className="text-[11px] text-muted-foreground font-medium">{fetchedBet.homeScore}</span>
               <span className="text-[11px] text-muted-foreground font-medium">:</span>
               <span className="text-[11px] text-muted-foreground font-medium">{fetchedBet.awayScore}</span>
@@ -203,22 +213,27 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
           {isFinished ? (
             <div className="flex items-center gap-1">
               <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
-                <span className="text-lg font-bold">{match.homeScore}</span>
+                <span className="text-lg font-bold">{match?.homeScore}</span>
               </div>
               <span className="text-muted-foreground font-bold">:</span>
               <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
-                <span className="text-lg font-bold">{match.awayScore}</span>
+                <span className="text-lg font-bold">{match?.awayScore}</span>
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-1">
+            <>
+            {canBet && (
+              <div className="flex items-center gap-1">
               <input type="number" min="0" max="20" value={bH} onChange={(e) => handleScore("home", e.target.value)} disabled={disabled}
                 className="w-11 h-11 text-center text-lg font-bold rounded-xl border-2 border-border focus:border-primary bg-background focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" placeholder="-" />
               <span className="text-muted-foreground font-bold text-lg">:</span>
               <input type="number" min="0" max="20" value={bA} onChange={(e) => handleScore("away", e.target.value)} disabled={disabled}
                 className="w-11 h-11 text-center text-lg font-bold rounded-xl border-2 border-border focus:border-primary bg-background focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" placeholder="-" />
             </div>
+            )}
+            </>
           )}
+          
         </div>
 
         <div className="flex-1 flex items-center gap-2.5 justify-end min-w-0">

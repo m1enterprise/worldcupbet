@@ -34,9 +34,6 @@ export async function pushBonusBet(userId, bonusBet) {
   // '2026-06-11T19:00:00Z'
   const now = new Date();
   const ctf = new Date('2026-06-11T19:00:00Z');
-  console.log(now)
-  console.log(ctf)
-  console.log(now<ctf)
   if (now > ctf) {
     return null
   }

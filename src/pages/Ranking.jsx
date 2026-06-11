@@ -244,11 +244,11 @@ export default function Ranking() {
                         </p>
                         <p className="text-[10px] text-muted-foreground">{accuracy}% trafność</p>
                       </div>
-                      <span className={`text-base font-bold text-center ${idx === 0 ? "text-yellow-500" : idx === 1 ? "text-slate-400" : idx === 2 ? "text-amber-600" : "text-foreground"}`}>
+                      <span className={`text-base font-bold text-center ${idx === 0 ? "text-green-600" : idx === 1 ? "text-green-600" : idx === 2 ? "text-green-600" : "text-green-600"}`}>
                         {player.zdobyte_punkty}
                       </span>
-                      <span className="text-xs text-center text-green-600 font-medium">{player.trafione_wyniki}</span>
-                      <span className="text-xs text-center text-primary font-medium">{player.dokladnie_trafione_wyniki}</span>
+                      <span className="text-base text-center text-green-600 font-bold">{player.trafione_wyniki}</span>
+                      <span className="text-base text-center text-primary font-bold">{player.dokladnie_trafione_wyniki}</span>
                     </div>
                   );
                 })}
@@ -260,12 +260,12 @@ export default function Ranking() {
           <div className="bg-card rounded-2xl border border-border p-4">
             <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Legenda punktacji</h3>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-yellow-500">5</span><span className="text-muted-foreground">Dokładny wynik (gr.)</span></div>
+              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-green-600">2</span><span className="text-muted-foreground">Trafiony zwycięzca ET</span></div>
+              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-green-600">5</span><span className="text-muted-foreground">Dokładny wynik (gr.)</span></div>
               <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-green-600">3</span><span className="text-muted-foreground">Trafiony zwycięzca</span></div>
-              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-primary">7</span><span className="text-muted-foreground">Remis + dogrywka (dokł.)</span></div>
-              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-primary">5</span><span className="text-muted-foreground">Remis + dogrywka</span></div>
-              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-muted-foreground">2</span><span className="text-muted-foreground">Trafiony zwycięzca ET</span></div>
-              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-primary">10</span><span className="text-muted-foreground">Bonus (mistrz / król)</span></div>
+              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-green-600">7</span><span className="text-muted-foreground">Remis + dogrywka (dokł.)</span></div>
+              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-green-600">5</span><span className="text-muted-foreground">Remis + dogrywka</span></div>
+              <div className="flex items-center gap-2"><span className="w-8 text-center font-bold text-green-600">10</span><span className="text-muted-foreground">Bonus (mistrz / król)</span></div>
             </div>
           </div>
         </div>

@@ -360,58 +360,6 @@ export default function MyBets() {
       <main className="flex-1 pb-24">
         <div className="max-w-2xl mx-auto px-4 py-4 space-y-6">
           {/* Bonus bets */}
-          <div className="bg-card rounded-2xl border border-border overflow-hidden">
-            <div className="px-4 py-3 bg-gradient-to-r from-primary/10 to-primary/5 border-b border-border">
-              <div className="flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-primary" />
-                <h2 className="font-display text-base font-bold">Bonusy (+10 pkt każdy)</h2>
-              </div>
-            </div>
-            <div className="p-4 space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
-                  🏆 Mistrz Świata
-                </label>
-                <SearchablePicker
-                  // options={teamOptions}
-                  options={teamsData}
-                  value={bonusBets.champion || ""}
-                  onChange={(val) => handleBonusChange("champion", val)}
-                  placeholder="Wybierz drużynę..."
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
-                  👟 Król Strzelców
-                </label>
-                <SearchablePicker
-                  // options={playerOptions}
-                  options={playersData}
-                  value={bonusBets.topScorer || ""}
-                  onChange={(val) => handleBonusChange("topScorer", val)}
-                  placeholder="Wybierz zawodnika..."
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
-                  👟 Król Asyst
-                </label>
-                <SearchablePicker
-                  // options={playerOptions}
-                  options={playersData}
-                  value={bonusBets.topAssister || ""}
-                  onChange={(val) => handleBonusChange("topAssister", val)}
-                  placeholder="Wybierz zawodnika..."
-                />
-              </div>
-
-              <button onClick={saveBonuses} className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors">
-                <Save className="w-4 h-4" /> Zapisz bonusy
-              </button>
-            </div>
-          </div>
 
           {/* Bet history */}
           <div>

@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { fetchMatches } from "../lib/api";
+// import { fetchMatches } from "../lib/api";
 import { loadBets, loadBonusBets, getSession, logout } from "../lib/auth";
 import { Trophy, Table2, Star, BarChart3, Target, Flame, TrendingUp, LogOut, LoaderPinwheel, Users } from "lucide-react";
 
@@ -98,7 +98,7 @@ export default function Points() {
   useEffect(() => { if (!session) navigate("/login"); }, []);
 
   const [matches, setMatches] = useState([]);
-  useEffect(() => { fetchMatches().then(setMatches).catch(() => {}); }, []);
+  // useEffect(() => { fetchMatches().then(setMatches).catch(() => {}); }, []);
 
   const bets = useMemo(() => loadBets(), []);
   const bonusBets = useMemo(() => loadBonusBets(), []);
