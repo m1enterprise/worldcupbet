@@ -11,7 +11,7 @@ function BottomNav() {
     { path: "/", icon: LoaderPinwheel, label: "Mecze" },
     { path: "/standings", icon: Table2, label: "Tabele" },
     { path: "/my-bets", icon: Star, label: "Moje typy" },
-    { path: "/points", icon: BarChart3, label: "Punkty" },
+    // { path: "/points", icon: BarChart3, label: "Punkty" },
     { path: "/ranking", icon: Users, label: "Ranking" },
   ];
   return (

@@ -14,6 +14,10 @@ const PHASE_NAMES = {
 };
 
 function calculateMatchPoints(bet, result) {
+
+  console.log("BET=", bet)
+  console.log("SCO=", result)
+
   if (bet.homeScore === null || bet.awayScore === null || result.homeScore === null || result.awayScore === null)
     return { points: 0, reason: "Brak danych" };
   const bH = parseInt(bet.homeScore), bA = parseInt(bet.awayScore);
@@ -42,7 +46,7 @@ function BottomNav() {
     { path: "/", icon: LoaderPinwheel, label: "Mecze" },
     { path: "/standings", icon: Table2, label: "Tabele" },
     { path: "/my-bets", icon: Star, label: "Moje typy" },
-    { path: "/points", icon: BarChart3, label: "Punkty" },
+    // { path: "/points", icon: BarChart3, label: "Punkty" },
     { path: "/ranking", icon: Users, label: "Ranking" },
   ];
   return (
@@ -228,6 +232,7 @@ import { getBets, getBetsByUserId, getBonusBetByUserId, pushBonusBet } from "../
 
 import playersData from "../lib/playersData.json"
 import teamsData from "../lib/teamsData.json"
+import { calcMatchPoints } from "../services/calcPointsService";
 
 export default function MyBets() {
   const navigate = useNavigate();
@@ -240,6 +245,8 @@ export default function MyBets() {
   const [bonusBets, setBonusBets] = useState({});
   const bets = useMemo(() => loadBets(), []);
   const [fetchedBonusData, setFetchedBonusData] = useState([])
+  const [matchesFullBet, setMatchesFullBet] = useState([])
+
   // const [footballPlayers, setFootballPlayers] = useState([worldCupData.teams]) // footballPlayers.map(item)=>{item.squad}
   // const [footballTeams, setFootballTeams] = useState([worldCupData.teams])
 
@@ -283,41 +290,37 @@ export default function MyBets() {
   };
 
   useEffect(() => {
-    // 2. get full match data for match.id === bet.id
     const fetchData = async () => {
       // BETS BY USER ID
       const bet_data = await getBetsByUserId(session?.id);
       if (!bet_data) return console.log('No user_bet data found');
-      console.log('bet_data: ', bet_data);
 
       // ALL MATCHES
       const data = await getMatches();
       if (!data) return console.log('No match data found');
-      const matchesFullBet = data.filter((match) => bet_data.some((bet) => bet.id === match.id));
+      const matchesFullBetData = data.filter((match) => bet_data.some((bet) => String(bet.matchId) === String(match.id)));
 
       // BONUS BET BY USER ID
       const bonus_arr = await getBonusBetByUserId(session?.id)
       const bonus_data = bonus_arr[0]
       if (!bonus_data) return console.log('No user_bet data found');
-      console.log('bonus_data: ', bonus_data);
-      //champtio
-      //topScorer
+
+      console.log(1, bet_data[0])
+      console.log(2, data[0])
+
+      // CALC USER POINTS
+      // const userBetPoints = calcMatchPoints(bet_data[0], data[0])
+      // console.log("CALC_BET_SCR: ", userBetPoints)
+
       setBonusBets({
         champion: bonus_data.bonusChampion,
         topScorer: bonus_data.bonusScorer,
         topAssister: bonus_data.bonusAssister
       })
-      console.log({
-        champion: bonus_data.bonusChampion,
-        topScorer: bonus_data.bonusScorer
-      })
       setUserBets(bet_data);
-      setMatches(matchesFullBet);
+      setMatches(data);
       setFetchedBonusData(bonus_data)
-
-      // console.log(matchesFullBet)
-      // console.log(bet_data);
-      console.log(122, bet_data?.length === 0 ? '0' : '>')
+      setMatchesFullBet(matchesFullBetData)
     };
     fetchData();
   }, []);
@@ -452,17 +455,23 @@ export default function MyBets() {
           <div className="space-y-2">
             {userBets.map((match) => {
               
-              const isFinished = match.status === "finished";
+              const isFinished = match.status === "FINISHED";
               let pointsInfo = null;
               // if (isFinished) {
               //   pointsInfo = calculateMatchPoints(match, {
-              //     homeScore: match.homeScore,
-              //     awayScore: match.awayScore,
-              //     extraTimeWinner: match.extraTimeWinner,
-              //     phase: match.phase,
+              //     homeScore: matchBet?.score?.fullTime?.home,
+              //     awayScore: matchBet?.score?.fullTime?.away,
+              //     extraTimeWinner: matchBet?.score?.extraTimeWinner,
+              //     phase: matchBet?.phase,
               //   });
               // }
 
+              console.log("matches full bet", matchesFullBet)
+
+              // filter matchesFullBet for this matchId
+              const matchBetData = matchesFullBet?.filter((item)=>String(item?.id) === String(match?.matchId))?.[0]
+              const userBetInfo = calcMatchPoints(match, matchBetData)
+              console.log("CALC_BET_SCR: ", userBetInfo)
               return (
                 <div
                   key={match.id}
@@ -475,25 +484,28 @@ export default function MyBets() {
                         ? `Gr. ${match.group.slice(-1)}`
                         : PHASE_NAMES[match.phase]}
                     </span>
-                    {isFinished && pointsInfo && (
+                    {userBetInfo && matchBetData?.status === "FINISHED" && (
+                      <>
+                      <div className="text-[12px] font-bold text-center">
+                        {matchBetData?.score?.fullTime.home}:{matchBetData?.score?.fullTime.away}
+                      </div>
                       <div
-                        className={`text-[10px] font-bold ${
-                          pointsInfo.points > 0
-                            ? "bg-green-100 text-green-700 border-green-200"
-                            : "bg-red-50 text-red-500 border-red-200"
+                        className={`text-[12px] font-bold ${
+                          userBetInfo.points > 0
+                            ? "text-green-700"
+                            : "text-red-500"
                         }`}
                       >
-                        {pointsInfo.points > 0 ? "+" : ""}
-                        {pointsInfo.points} pkt
+                        {userBetInfo.points} pkt
                       </div>
+                      </>
                     )}
-                    {!isFinished && (
+                    {!(matchBetData?.status === "FINISHED") && (
                       <div variant="secondary" className="text-[10px]">
                         Oczekuje
                       </div>
                     )}
                   </div>
-
                   <div className="flex items-center gap-2">
 
                     <div className="w-12 h-8">

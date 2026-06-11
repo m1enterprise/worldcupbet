@@ -53,7 +53,7 @@ function BottomNav() {
     { path: "/", icon: LoaderPinwheel, label: "Mecze" },
     { path: "/standings", icon: Table2, label: "Tabele" },
     { path: "/my-bets", icon: Star, label: "Moje typy" },
-    { path: "/points", icon: BarChart3, label: "Punkty" },
+    // { path: "/points", icon: BarChart3, label: "Punkty" },
     { path: "/ranking", icon: Users, label: "Ranking" },
   ];
   return (
@@ -139,7 +139,7 @@ function DaySelector({ dates, selectedDate, onSelect }) {
 function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
   const isKnockout = match.stage !== "GROUP_STAGE";
   const isFinished = match.status === "FINISHED";
-
+  console.log(142142, match)
   const now = new Date();
   const ctf = new Date(match.utcDate);
   console.log(now)
@@ -212,12 +212,12 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
         <div className="flex items-center gap-1.5 shrink-0">
           {isFinished ? (
             <div className="flex items-center gap-1">
-              <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
-                <span className="text-lg font-bold">{match?.homeScore}</span>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+                <span className="text-lg font-bold">{match?.score?.fullTime?.home}</span>
               </div>
               <span className="text-muted-foreground font-bold">:</span>
-              <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
-                <span className="text-lg font-bold">{match?.awayScore}</span>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+                <span className="text-lg font-bold">{match?.score?.fullTime?.away}</span>
               </div>
             </div>
           ) : (

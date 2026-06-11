@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getSession, logout } from "../lib/auth";
 // import { fetchMatches } from "@/lib/api";
-import { calcPointsForAllUsers } from "../services/calcPointsService";
+import { calcMatchPoints, calcPointsForAllUsers } from "../services/calcPointsService";
 import { Trophy, Table2, Star, BarChart3, Medal, RefreshCw, LogOut, Users, LoaderPinwheel } from "lucide-react";
 import { getBets } from "../services/betService";
 import { getUsers } from "../services/userService";
@@ -14,7 +14,7 @@ function BottomNav() {
     { path: "/", icon: LoaderPinwheel, label: "Mecze" },
     { path: "/standings", icon: Table2, label: "Tabele" },
     { path: "/my-bets", icon: Star, label: "Moje typy" },
-    { path: "/points", icon: BarChart3, label: "Punkty" },
+    // { path: "/points", icon: BarChart3, label: "Punkty" },
     { path: "/ranking", icon: Users, label: "Ranking" },
   ];
   return (
@@ -71,6 +71,7 @@ export default function Ranking() {
   const [allUsers, setAllUsers] = useState([]);
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [allUsersBetCalc, setAllUsersBetCalc] = useState([]);
 
   useEffect(() => {
     // try{
@@ -100,12 +101,70 @@ export default function Ranking() {
             // Pobierz mecze z API
             const matches = await getMatches()
 
+            const usersBetCalcData = []
+            // Calc punkty dla each usera
+            users.map(user=>{
+              // users bets filter
+              const userBets = bets.filter(bet=>String(bet.userId) === String(user.id))
+              // console.log("USEER", userBets)
+
+              // matches full info by betId filter
+              // const userBetsMatchInfo = matches.filter(match=>userBets.some(bet=> String(match.id) === String(bet.matchId)))
+              // console.log("USEER_MATCHES", userBetsMatchInfo)
+
+              
+              // object per user
+              const userObject = {
+                userId: user.id,
+                userUsername: user.username,
+                userPoints: 0,
+                userPointsCorrect: 0,
+                userPointsExact: 0,
+                userBets: [],
+              }
+
+
+              userBets.map(bet=>{
+                const matchBetData = matches?.filter((item)=>String(item?.id) === String(bet?.matchId))?.[0]
+                // console.log(user.id, matchBetData)
+                const userBetInfo = calcMatchPoints(bet, matchBetData)
+                // console.log("CALC_BET_SCR: ", user.id, userBetInfo)
+
+                userObject.userBets.push(userBetInfo)
+              })
+
+              // calc all points
+              let calc = 0
+              // calc all isCorrect
+              let calcCorrect = 0
+              // calc all isExact
+              let calcExact = 0
+              userObject.userBets.map(bet=>{
+                calc = calc + bet.points
+                bet.isCorrect ? calcCorrect=calcCorrect+1 : null
+                bet.isExact ? calcExact=calcExact+1 : null
+              })
+              userObject.userPoints=calc
+              userObject.userPointsCorrect=calcCorrect
+              userObject.userPointsExact=calcExact
+
+              usersBetCalcData.push(userObject)
+            })
+
+            // sort by pkt
+            // const usersBetCalcDataSort = usersBetCalcData.sort(item=>item.points)
+            const usersBetCalcDataSort = [...usersBetCalcData].sort(
+              (a, b) => b.userPoints - a.userPoints
+            );
+            console.log(1234, usersBetCalcDataSort)
+
             setAllBets(bets);
             setAllUsers(users);
             setMatches(matches);
+            setAllUsersBetCalc(usersBetCalcDataSort);
     
           } catch (err) {
-            setError(err.message);
+            console.log(err.message);
           } finally {
             setLoading(false);
           }
@@ -220,7 +279,10 @@ export default function Ranking() {
                   <span className="text-center">Trafne</span>
                   <span className="text-center">Dokł.</span>
                 </div>
-                {ranking.map((player, idx) => {
+                {allUsersBetCalc.map((player, idx) => {
+                  
+                  console.log("PLAYER", player)
+
                   const accuracy = player.bets_placed > 0
                     ? Math.round((player.trafione_wyniki / player.bets_placed) * 100)
                     : 0;
@@ -239,19 +301,19 @@ export default function Ranking() {
                       </div>
                       <div className="min-w-0">
                         <p className={`text-sm font-bold truncate ${player.isMe ? "text-primary" : ""}`}>
-                          {player.username}
+                          {player.userUsername}
                           {player.isMe && <span className="ml-1.5 text-[10px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">Ty</span>}
                         </p>
-                        <p className="text-[10px] text-muted-foreground">{accuracy}% trafność</p>
+                        {/* <p className="text-[10px] text-muted-foreground">{accuracy}% trafność</p> */}
                       </div>
                       <span className={`text-base font-bold text-center ${idx === 0 ? "text-green-600" : idx === 1 ? "text-green-600" : idx === 2 ? "text-green-600" : "text-green-600"}`}>
-                        {player.zdobyte_punkty}
+                        {player.userPoints}
                       </span>
-                      <span className="text-base text-center text-green-600 font-bold">{player.trafione_wyniki}</span>
-                      <span className="text-base text-center text-primary font-bold">{player.dokladnie_trafione_wyniki}</span>
+                      <span className="text-sm text-center text-green-600 font-bold">{player.userPointsCorrect}</span>
+                      <span className="text-sm text-center text-primary font-bold">{player.userPointsExact}</span>
                     </div>
                   );
-                })}
+                })};
               </div>
             )}
           </div>
