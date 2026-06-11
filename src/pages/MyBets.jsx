@@ -473,6 +473,23 @@ export default function MyBets() {
               </div>
             )} */}
 
+    <div className="bg-card rounded-2xl border border-border p-3 text-center mb-1.5">
+            <p className="text-muted-foreground text-sm">
+              BONUS BET
+            </p>
+            <label className="tracking-wide mb-1.5 block text-start text-[11px] font-medium">
+                  <span className="text-muted-foreground uppercase">🏆 Mistrz Świata: </span>
+                  <span className="text-xs font-semibold flex-1 truncate">{fetchedBonusData?.bonusChampion}</span>
+            </label>
+            <label className="tracking-wide mb-1.5 block text-start text-[11px] font-medium">
+                  <span className="text-muted-foreground uppercase">👟 Król Strzelców: </span>
+                  <span className="text-xs font-semibold flex-1 truncate">{fetchedBonusData?.bonusScorer}</span>
+            </label>
+            <label className="tracking-wide mb-1.5 block text-start text-[11px] font-medium">
+                  <span className="text-muted-foreground uppercase">👟 Król Asyst: </span> 
+                  <span className="text-xs font-semibold flex-1 truncate">{fetchedBonusData?.bonusAssister}</span>
+            </label>
+      </div>
 
     {userBets.length === 0 ? (
           <div className="bg-card rounded-2xl border border-border p-8 text-center">
@@ -539,7 +556,7 @@ export default function MyBets() {
                       {match.homeTeam.name}
                     </span>
                     <span className="text-sm font-bold bg-muted rounded-lg px-2.5 py-1">
-                      {match.homeScore || '?'} : {match.awayScore || '?'}
+                      {match.homeScore} : {match.awayScore}
                     </span>
                     <span className="text-xs font-semibold flex-1 truncate text-right">
                       {match.awayTeam.name}

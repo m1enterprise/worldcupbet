@@ -173,7 +173,7 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
               {pointsInfo.points > 0 ? "+" : ""}{pointsInfo.points} pkt
             </span>
           )}
-          <span className="text-[11px] text-muted-foreground font-medium">{match.utcDate.slice(-9, -4)}</span>
+          <span className="text-[11px] text-muted-foreground font-medium">{Number(match.utcDate.slice(-9, -7))+2}{match.utcDate.slice(-7, -4)}</span>
         </div>
       </div>
 
@@ -189,13 +189,13 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
           </div>
         </div>
 
-        
           {fetchedBet && (
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 flex items-center gap-1">
-                          <span className="text-muted-foreground font-bold">Mecz obstawiony</span>
-              <span className="text-lg font-bold">{fetchedBet.homeScore}</span>
-              <span className="text-muted-foreground font-bold">:</span>
-              <span className="text-lg font-bold">{fetchedBet.awayScore}</span>
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1">
+              <span className="text-[11px] text-muted-foreground font-medium">Mecz obstawiony</span>
+              
+              <span className="text-[11px] text-muted-foreground font-medium">{fetchedBet.homeScore}</span>
+              <span className="text-[11px] text-muted-foreground font-medium">:</span>
+              <span className="text-[11px] text-muted-foreground font-medium">{fetchedBet.awayScore}</span>
             </div>
           )}
 
