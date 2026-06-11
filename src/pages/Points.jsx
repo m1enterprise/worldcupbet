@@ -155,7 +155,7 @@ export default function Points() {
             <StatCard icon={TrendingUp} label="Faza pucharowa" value={`${knockoutPoints} pkt`} accent="bg-purple-100 text-purple-600" />
           </div>
 
-          {/* Bonuses */}
+          {/* Bonuses
           <div className="bg-card rounded-2xl border border-border overflow-hidden">
             <div className="px-4 py-2.5 bg-primary/5 border-b border-border">
               <h3 className="text-sm font-bold">Bonusy</h3>
@@ -171,7 +171,7 @@ export default function Points() {
                 <span className="text-sm font-bold text-primary">{bonusBets.topScorer || "Nie obstawiono"}</span>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Points breakdown */}
           {details.length > 0 && (

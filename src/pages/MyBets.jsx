@@ -91,14 +91,41 @@ function SearchablePicker({ options, value, onChange, placeholder }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
 
-  const filtered = useMemo(() => {
-    if (!query) return options;
-    return options.filter((o) =>
-      o.label.toLowerCase().includes(query.toLowerCase())
-    );
-  }, [options, query]);
+  console.log(94, options)
 
-  const selected = options.find((o) => o.value === value);
+  // const filtered = useMemo(() => {
+  //   if (!query) return options;
+  //   return options.filter((o) =>
+  //     o?.name.toLowerCase().includes(query.toLowerCase())
+  //   );
+  // }, [options, query]);
+
+  const filtered = options
+  .map((player) => {
+    const name = player.name.toLowerCase();
+    const q = query.toLowerCase().trim();
+
+    let score = 0;
+
+    // Exact match
+    if (name === q) score += 100;
+
+    // Starts with query
+    if (name.startsWith(q)) score += 50;
+
+    // Any word starts with query
+    if (name.split(" ").some((word) => word.startsWith(q))) score += 30;
+
+    // Contains query
+    if (name.includes(q)) score += 20;
+
+    return { player, score };
+  })
+  .filter((x) => x.score > 0)
+  .sort((a, b) => b.score - a.score)
+  .map((x) => x.player);
+
+  const selected = options.find((o) => o?.name === value);
 
   return (
     <div className="relative">
@@ -108,7 +135,7 @@ function SearchablePicker({ options, value, onChange, placeholder }) {
         className="w-full h-11 rounded-xl border border-border bg-background text-sm px-3 text-left flex items-center justify-between focus:outline-none focus:border-primary transition-colors"
       >
         {selected ? (
-          <span className="font-medium">{selected.label}</span>
+          <span className="font-medium">{selected?.name}</span>
         ) : (
           <span className="text-muted-foreground">{placeholder}</span>
         )}
@@ -116,36 +143,78 @@ function SearchablePicker({ options, value, onChange, placeholder }) {
       </button>
 
       {open && (
-        <div className="absolute z-50 left-0 right-0 top-12 bg-card border border-border rounded-xl shadow-xl overflow-hidden">
-          <div className="p-2 border-b border-border">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-              <input
-                autoFocus
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Szukaj..."
-                className="w-full pl-8 pr-3 h-8 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-primary"
-              />
-            </div>
-          </div>
-          <div className="max-h-56 overflow-y-auto">
-            {filtered.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-4">Brak wyników</p>
-            ) : (
-              filtered.map((o) => (
-                <button
-                  key={o.value}
-                  type="button"
-                  onClick={() => { onChange(o.value); setOpen(false); setQuery(""); }}
-                  className={`w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors flex items-center gap-2 ${o.value === value ? "bg-primary/10 text-primary font-semibold" : ""}`}
-                >
-                  {o.label}
-                </button>
-              ))
-            )}
-          </div>
-        </div>
+        // <div className="absolute z-50 left-0 right-0 top-12 bg-card border border-border rounded-xl shadow-xl overflow-hidden">
+        //   <div className="p-2 border-b border-border">
+        //     <div className="relative">
+        //       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+        //       <input
+        //         autoFocus
+        //         value={query}
+        //         onChange={(e) => setQuery(e.target.value)}
+        //         placeholder="Szukaj..."
+        //         className="w-full pl-8 pr-3 h-8 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-primary"
+        //       />
+        //     </div>
+        //   </div>
+        //   <div className="absolute max-h-56 overflow-y-auto">
+        //     {options.length === 0 ? (
+        //       <p className="text-xs text-muted-foreground text-center py-4">Brak wyników</p>
+        //     ) : (
+        //       options.map((o) => (
+        //         <button
+        //           key={o.id}
+        //           type="button"
+        //           onClick={() => { onChange(o.name); setOpen(false); setQuery(""); }}
+        //           className={`w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors flex items-center gap-2 ${o?.name === value ? "bg-primary/10 text-primary font-semibold" : ""}`}
+        //         >
+        //           {o?.name}
+        //         </button>
+        //       ))
+        //     )}
+        //   </div>
+        // </div>
+
+        <div className="relative">
+  {/* Search input */}
+  <div className="relative">
+    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+    <input
+      autoFocus
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+      placeholder="Szukaj..."
+      className="w-full pl-8 pr-3 h-8 rounded-lg bg-background border border-border text-sm"
+    />
+  </div>
+
+  {/* Dropdown */}
+  <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-card border border-border rounded-xl shadow-xl max-h-56 overflow-y-auto">
+    {filtered.length === 0 ? (
+      <p className="text-xs text-muted-foreground text-center py-4">
+        Brak wyników
+      </p>
+    ) : (
+      filtered.map((o) => (
+        <button
+          key={o.id}
+          type="button"
+          onClick={() => {
+            onChange(o.name);
+            setOpen(false);
+            setQuery("");
+          }}
+          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors flex items-center gap-2 ${
+            o.name === value
+              ? "bg-primary/10 text-primary font-semibold"
+              : ""
+          }`}
+        >
+          {o.name}
+        </button>
+      ))
+    )}
+  </div>
+</div>
       )}
     </div>
   );
@@ -155,6 +224,10 @@ function SearchablePicker({ options, value, onChange, placeholder }) {
 // import wcData from "../lib/wc_data.json";
 import { getMatches } from "../services/matchService";
 import { getBets, getBetsByUserId, getBonusBetByUserId, pushBonusBet } from "../services/betService";
+// import worldCupData from "../lib/players.json"
+
+import playersData from "../lib/playersData.json"
+import teamsData from "../lib/teamsData.json"
 
 export default function MyBets() {
   const navigate = useNavigate();
@@ -167,6 +240,14 @@ export default function MyBets() {
   const [bonusBets, setBonusBets] = useState({});
   const bets = useMemo(() => loadBets(), []);
   const [fetchedBonusData, setFetchedBonusData] = useState([])
+  // const [footballPlayers, setFootballPlayers] = useState([worldCupData.teams]) // footballPlayers.map(item)=>{item.squad}
+  // const [footballTeams, setFootballTeams] = useState([worldCupData.teams])
+
+  // const [footballPlayers, setFootballPlayers] = useState([])
+  useEffect(()=>{
+    console.log(1, playersData)
+    console.log(2, teamsData)
+  },[])
 
     // Teams list sorted alphabetically
   const teamOptions = useMemo(() => {
@@ -191,7 +272,8 @@ export default function MyBets() {
     const bonusData = {
       "bonusUserId": session.id,
       "bonusChampion": bonusBets.champion,
-      "bonusScorer": bonusBets.topScorer
+      "bonusScorer": bonusBets.topScorer,
+      "bonusAssister": bonusBets.topAssister
     }
 
         console.log(192, bonusData)
@@ -222,7 +304,8 @@ export default function MyBets() {
       //topScorer
       setBonusBets({
         champion: bonus_data.bonusChampion,
-        topScorer: bonus_data.bonusScorer
+        topScorer: bonus_data.bonusScorer,
+        topAssister: bonus_data.bonusAssister
       })
       console.log({
         champion: bonus_data.bonusChampion,
@@ -290,7 +373,8 @@ export default function MyBets() {
                   🏆 Mistrz Świata
                 </label>
                 <SearchablePicker
-                  options={teamOptions}
+                  // options={teamOptions}
+                  options={teamsData}
                   value={bonusBets.champion || ""}
                   onChange={(val) => handleBonusChange("champion", val)}
                   placeholder="Wybierz drużynę..."
@@ -302,9 +386,23 @@ export default function MyBets() {
                   👟 Król Strzelców
                 </label>
                 <SearchablePicker
-                  options={playerOptions}
+                  // options={playerOptions}
+                  options={playersData}
                   value={bonusBets.topScorer || ""}
                   onChange={(val) => handleBonusChange("topScorer", val)}
+                  placeholder="Wybierz zawodnika..."
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5 block">
+                  👟 Król Asyst
+                </label>
+                <SearchablePicker
+                  // options={playerOptions}
+                  options={playersData}
+                  value={bonusBets.topAssister || ""}
+                  onChange={(val) => handleBonusChange("topAssister", val)}
                   placeholder="Wybierz zawodnika..."
                 />
               </div>
