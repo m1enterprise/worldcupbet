@@ -145,7 +145,8 @@ export default function Standings() {
     useEffect(() => {
       const fetchData = async () => {
         const data = await getStandings();
-        setStandings(data);
+        const dataSort = [...data].sort((a, b) => a.sortBy - b.sortBy);
+        setStandings(dataSort);
       };
       fetchData();
       setLoading(false);

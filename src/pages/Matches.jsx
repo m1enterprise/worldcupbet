@@ -139,7 +139,7 @@ function DaySelector({ dates, selectedDate, onSelect }) {
 function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
   const isKnockout = match.stage !== "GROUP_STAGE";
   const isFinished = match.status === "FINISHED";
-  console.log(142142, match)
+
   const now = new Date();
   const ctf = new Date(match.utcDate);
   console.log(now)
@@ -169,6 +169,9 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
     pointsInfo = calculateMatchPoints(bet, { homeScore: match.homeScore, awayScore: match.awayScore, extraTimeWinner: match.extraTimeWinner, phase: match.phase });
   }
 
+  // const match_t = `${Number(match.utcDate.slice(-9, -7))+2}${String(match.utcDate.slice(-7, -4))}`
+  const match_t = `${String((Number(match.utcDate.slice(-9, -7)) + 2) % 24).padStart(2, '0')}${match.utcDate.slice(-7, -4)}`;
+
   return (
     <div className={`relative bg-card rounded-2xl border border-border overflow-hidden transition-all ${isFinished ? "opacity-80" : "shadow-sm hover:shadow-md"}`}>
       <div className="flex items-center justify-between px-4 pt-3 pb-1">
@@ -183,7 +186,11 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
               {pointsInfo.points > 0 ? "+" : ""}{pointsInfo.points} pkt
             </span>
           )}
-          <span className="text-[11px] text-muted-foreground font-medium">{Number(match.utcDate.slice(-9, -7))+2}{match.utcDate.slice(-7, -4)}</span>
+          <span className="text-[11px] text-muted-foreground font-medium">
+            {
+              match_t
+            }
+          </span>
         </div>
       </div>
 
