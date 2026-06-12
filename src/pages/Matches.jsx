@@ -334,8 +334,10 @@ export default function Matches() {
 
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  
   const [error, setError] = useState(null);
   const [saved, setSaved] = useState(false);
+
   const [dayBets, setDayBets] = useState([]);
   const [fetchedBetData, setFetchedBetData] = useState([])
 
@@ -363,7 +365,7 @@ export default function Matches() {
           }).formatToParts(date);
 
           const get = type => parts.find(p => p.type === type).value;
-          
+
           return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}:${get('second')}Z`;
         }
         
