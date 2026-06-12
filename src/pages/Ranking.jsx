@@ -44,8 +44,8 @@ function Header({ username }) {
           <Trophy className="w-5 h-5 text-primary-foreground" />
         </div>
         <div className="flex-1">
-          <h1 className="font-display text-lg font-bold leading-tight">World Cup 2026</h1>
-          <p className="text-xs text-secondary-foreground/60 font-medium">Typer turniejowy</p>
+          <h1 className="font-display text-lg font-bold leading-tight">Essa Bet</h1>
+          <p className="text-xs text-secondary-foreground/60 font-medium">World Cup 2026</p>
         </div>
         {username && (
           <button onClick={handleLogout} className="flex items-center gap-1.5 text-xs text-secondary-foreground/60 hover:text-secondary-foreground transition-colors">

@@ -85,7 +85,7 @@ function Header({ username }) {
         </div>
         <div className="flex-1">
           <h1 className="font-display text-lg font-bold leading-tight">Essa Bet</h1>
-          <p className="text-xs text-secondary-foreground/60 font-medium">World Cup 2026 v1.2</p>
+          <p className="text-xs text-secondary-foreground/60 font-medium">World Cup 2026</p>
         </div>
         {username && (
           <button onClick={handleLogout} className="flex items-center gap-1.5 text-xs text-secondary-foreground/60 hover:text-secondary-foreground transition-colors">
@@ -170,50 +170,67 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
   }
 
   // const match_t = `${Number(match.utcDate.slice(-9, -7))+2}${String(match.utcDate.slice(-7, -4))}`
-  const match_t = `${String((Number(match.utcDate.slice(-9, -7)) + 2) % 24).padStart(2, '0')}${match.utcDate.slice(-7, -4)}`;
+  // const match_t = `${String((Number(match.utcDate.slice(-9, -7)) + 2) % 24).padStart(2, '0')}${match.utcDate.slice(-7, -4)}`;
+  const match_t = match.utcDate
 
   return (
-    <div className={`relative bg-card rounded-2xl border border-border overflow-hidden transition-all ${isFinished ? "opacity-80" : "shadow-sm hover:shadow-md"}`}>
-      <div className="flex items-center justify-between px-4 pt-3 pb-1">
-        <div className="flex items-center gap-2">
-          {match.group && <span className="text-[10px] font-bold px-2 py-0.5 bg-secondary text-secondary-foreground rounded-full">Gr. {match.group.slice(-1)}</span>}
+    <div className={`relative bg-card rounded-2xl border border-border overflow-hidden transition-all ${isFinished ? "opacity-70" : "shadow-sm hover:shadow-md"}`}>
+      <div className="flex items-center justify-between px-4 pt-3">
+        <div className="flex items-start gap-2 text-muted-foreground"> 
+          {match.group && <span className="text-[10px] font-medium rounded-full">{match.group.slice(-1)}</span>}
           {isKnockout && <span className="text-[10px] font-bold px-2 py-0.5 bg-primary/10 text-primary rounded-full">{PHASE_NAMES[match.phase]}</span>}
           {match.status === "live" && <span className="text-[10px] font-bold px-2 py-0.5 bg-red-500 text-white rounded-full animate-pulse">NA ŻYWO</span>}
         </div>
+
         <div className="flex items-center gap-2">
-          {isFinished && pointsInfo && (
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${pointsInfo.points > 0 ? "bg-green-100 text-green-700" : "bg-red-50 text-red-500"}`}>
-              {pointsInfo.points > 0 ? "+" : ""}{pointsInfo.points} pkt
-            </span>
-          )}
           <span className="text-[11px] text-muted-foreground font-medium">
             {
-              match_t
+              match_t.slice(-9,-4)
             }
           </span>
         </div>
       </div>
 
       <div className="px-4 py-3 flex items-center gap-3">
-        <div className="flex-1 flex items-center gap-2.5 min-w-0">
-          <div className="w-12 h-8">
-            <img className="w-full h-full object-cover rounded-[4px]"
-              src={match.homeTeam.crest}/>
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-bold truncate">{match.homeTeam.name}</p>
-            <p className="text-[10px] text-muted-foreground font-medium">{match.homeTeam.tla}</p>
-          </div>
-        </div>
+        
+         {
+            !useIsMobile() && (
+              <div className="flex-1 flex items-center gap-2.5 justify-start min-w-0">
+                <div className="w-12 h-8">
+                  <img   className="w-full h-full object-cover rounded-[4px]"
+                    src={match.homeTeam.crest}/>
+                </div>
+
+                <div className="min-w-0 text-left">
+                  <p className="text-sm font-bold">{match.homeTeam.name}</p>
+                  <p className="text-[10px] text-muted-foreground font-medium">{match.homeTeam.tla}</p>
+                </div>                    
+              </div>
+            )
+          }
+
+          {
+            useIsMobile() && (
+              <div className="flex-1 flex items-center gap-2.5 justify-start min-w-0"> 
+                <div className="w-12 h-8">
+                  <img   className="w-full h-full object-cover rounded-[4px]"
+                    src={match.homeTeam.crest}/>
+                </div>
+
+                <div className="min-w-0 text-left">
+                  <p className="text-sm font-bold">{match.homeTeam.tla}</p>
+                  {/* <p className="text-[10px] text-muted-foreground font-medium">{match.homeTeam.tla}</p> */}
+                </div> 
+              </div>
+            )
+          }
 
           {fetchedBet && (
           <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1">
-              <span className="text-[11px] text-muted-foreground font-medium">Mecz obstawiony</span>
+              <span className="text-[11px] text-muted-foreground font-medium">BET</span>
 
-              <span className="text-[11px] text-muted-foreground font-medium">{fetchedBet.homeScore}</span>
-              <span className="text-[11px] text-muted-foreground font-medium">:</span>
-              <span className="text-[11px] text-muted-foreground font-medium">{fetchedBet.awayScore}</span>
-            </div>
+              <span className="text-[11px] text-muted-foreground font-medium">{fetchedBet.homeScore} : {fetchedBet.awayScore}</span>
+          </div>
           )}
 
         <div className="flex items-center gap-1.5 shrink-0">
@@ -243,16 +260,36 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
           
         </div>
 
-        <div className="flex-1 flex items-center gap-2.5 justify-end min-w-0">
-          <div className="min-w-0 text-right">
-            <p className="text-sm font-bold truncate">{match.awayTeam.name}</p>
-            <p className="text-[10px] text-muted-foreground font-medium">{match.awayTeam.tla}</p>
-          </div>                    
-          <div className="w-12 h-8">
-            <img   className="w-full h-full object-cover rounded-[4px]"
-              src={match.awayTeam.crest}/>
-          </div>
-        </div>
+          {
+            !useIsMobile() && (
+              <div className="flex-1 flex items-center gap-2.5 justify-end min-w-0">
+                <div className="min-w-0 text-right">
+                  <p className="text-sm font-bold">{match.awayTeam.name}</p>
+                  <p className="text-[10px] text-muted-foreground font-medium">{match.awayTeam.tla}</p>
+                </div>                    
+                <div className="w-12 h-8">
+                  <img   className="w-full h-full object-cover rounded-[4px]"
+                    src={match.awayTeam.crest}/>
+                </div>
+              </div>
+            )
+          }
+
+          {
+            useIsMobile() && (
+              <div className="flex-1 flex items-center gap-2.5 justify-end min-w-0">                   
+                <div className="min-w-0 text-left">
+                  <p className="text-sm font-bold">{match.awayTeam.tla}</p>
+                  {/* <p className="text-[10px] text-muted-foreground font-medium">{match.awayTeam.tla}</p> */}
+                </div> 
+
+                <div className="w-12 h-8">
+                  <img   className="w-full h-full object-cover rounded-[4px]"
+                    src={match.awayTeam.crest}/>
+                </div>
+              </div>
+            )
+          }
       </div> 
 
       {isKnockout && isBetDraw && !isFinished && !disabled && (
@@ -286,6 +323,7 @@ import { getMatches } from "../services/matchService";
 // import { pushBet } from "../services/betService";
 import { getUserBets, saveBet } from "../services/betServiceMod";
 import { getBetsByUserId } from "../services/betService";
+import { useIsMobile } from "../hooks/use-mobile";
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Matches() {
@@ -311,7 +349,36 @@ export default function Matches() {
         setLoading(true);
 
         const data = await getMatches();
-        setMatches(data || []);
+
+        // edit match UTC time
+        function utcToPolandIso(utcString) {
+          const date = new Date(utcString);
+          const parts = new Intl.DateTimeFormat('sv-SE', {
+            timeZone: 'Europe/Warsaw',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+          }).formatToParts(date);
+
+          const get = type => parts.find(p => p.type === type).value;
+          return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}:${get('second')}Z`;
+        }
+        
+        data.map(match=>{
+            const match_t = utcToPolandIso(match.utcDate)
+            console.log(match.matchId, match_t)
+            match.utcDate = match_t
+        })
+
+        const sorted = [...data].sort(
+          (a, b) => new Date(a.utcDate) - new Date(b.utcDate)
+        );
+        
+        setMatches(sorted || []);
 
         const betData = await getBetsByUserId(session.id)
         setFetchedBetData(betData || [])

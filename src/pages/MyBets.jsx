@@ -77,7 +77,7 @@ function Header({ username }) {
         </div>
         <div className="flex-1">
           <h1 className="font-display text-lg font-bold leading-tight">Essa Bet</h1>
-          <p className="text-xs text-secondary-foreground/60 font-medium">World Cup 2026 v1.2</p>
+          <p className="text-xs text-secondary-foreground/60 font-medium">World Cup 2026</p>
         </div>
         {username && (
           <button onClick={handleLogout} className="flex items-center gap-1.5 text-xs text-secondary-foreground/60 hover:text-secondary-foreground transition-colors">
@@ -298,7 +298,36 @@ export default function MyBets() {
       // ALL MATCHES
       const data = await getMatches();
       if (!data) return console.log('No match data found');
-      const matchesFullBetData = data.filter((match) => bet_data.some((bet) => String(bet.matchId) === String(match.id)));
+      // edit match UTC time
+        function utcToPolandIso(utcString) {
+          const date = new Date(utcString);
+          const parts = new Intl.DateTimeFormat('sv-SE', {
+            timeZone: 'Europe/Warsaw',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+          }).formatToParts(date);
+
+          const get = type => parts.find(p => p.type === type).value;
+          return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}:${get('second')}Z`;
+        }
+        
+        data.map(match=>{
+            const match_t = utcToPolandIso(match.utcDate)
+            console.log(match.matchId, match_t)
+            match.utcDate = match_t
+        })
+
+        const sorted = [...data].sort(
+          (a, b) => new Date(a.utcDate) - new Date(b.utcDate)
+        );
+        
+        setMatches(sorted || []);
+        const matchesFullBetData = data.filter((match) => bet_data.some((bet) => String(bet.matchId) === String(match.id)));
 
       // BONUS BET BY USER ID
       const bonus_arr = await getBonusBetByUserId(session?.id)
@@ -318,7 +347,7 @@ export default function MyBets() {
         topAssister: bonus_data.bonusAssister
       })
       setUserBets(bet_data);
-      setMatches(data);
+      // setMatches(data);
       setFetchedBonusData(bonus_data)
       setMatchesFullBet(matchesFullBetData)
     };
