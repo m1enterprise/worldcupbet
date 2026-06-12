@@ -330,11 +330,12 @@ export default function Matches() {
   
   useEffect(() => {
     if (!session) navigate("/login");
+    
   }, []);
 
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [error, setError] = useState(null);
   const [saved, setSaved] = useState(false);
 
