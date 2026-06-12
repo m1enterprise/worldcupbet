@@ -329,8 +329,9 @@ export default function Matches() {
   const session = getSession();
   
   useEffect(() => {
-    if (!session) navigate("/login");
     
+    if (!session) navigate("/login");
+
   }, []);
 
   const [matches, setMatches] = useState([]);
