@@ -228,7 +228,6 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
           {fetchedBet && (
           <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1">
               <span className="text-[11px] text-muted-foreground font-medium">BET</span>
-
               <span className="text-[11px] text-muted-foreground font-medium">{fetchedBet.homeScore} : {fetchedBet.awayScore}</span>
           </div>
           )}
@@ -280,7 +279,6 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
               <div className="flex-1 flex items-center gap-2.5 justify-end min-w-0">                   
                 <div className="min-w-0 text-left">
                   <p className="text-sm font-bold">{match.awayTeam.tla}</p>
-                  {/* <p className="text-[10px] text-muted-foreground font-medium">{match.awayTeam.tla}</p> */}
                 </div> 
 
                 <div className="w-12 h-8">
@@ -365,6 +363,7 @@ export default function Matches() {
           }).formatToParts(date);
 
           const get = type => parts.find(p => p.type === type).value;
+          
           return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}:${get('second')}Z`;
         }
         
@@ -425,8 +424,6 @@ export default function Matches() {
   const handleDateChange = useCallback((date) => { setSelectedDate(date); setSaved(false); }, []);
 
   const handleBetChange = useCallback((match, bet) => {
-    // console.log(match)
-
     const betObject = {
       matchId: match.id,
       matchUtcDate: match.utcDate,

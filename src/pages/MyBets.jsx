@@ -298,6 +298,7 @@ export default function MyBets() {
       // ALL MATCHES
       const data = await getMatches();
       if (!data) return console.log('No match data found');
+      
       // edit match UTC time
         function utcToPolandIso(utcString) {
           const date = new Date(utcString);
