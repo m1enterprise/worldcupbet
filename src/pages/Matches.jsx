@@ -169,6 +169,9 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
     pointsInfo = calculateMatchPoints(bet, { homeScore: match.homeScore, awayScore: match.awayScore, extraTimeWinner: match.extraTimeWinner, phase: match.phase });
   }
 
+  console.log("MATCH", match.id, match)
+  console.log("BET", match.id, bet)
+
   // const match_t = `${Number(match.utcDate.slice(-9, -7))+2}${String(match.utcDate.slice(-7, -4))}`
   // const match_t = `${String((Number(match.utcDate.slice(-9, -7)) + 2) % 24).padStart(2, '0')}${match.utcDate.slice(-7, -4)}`;
   const match_t = match.utcDate
@@ -280,7 +283,6 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
                 <div className="min-w-0 text-left">
                   <p className="text-sm font-bold">{match.awayTeam.tla}</p>
                 </div> 
-
                 <div className="w-12 h-8">
                   <img   className="w-full h-full object-cover rounded-[4px]"
                     src={match.awayTeam.crest}/>
@@ -343,9 +345,7 @@ export default function Matches() {
   const [dayBets, setDayBets] = useState([]);
   const [fetchedBetData, setFetchedBetData] = useState([])
 
-  useEffect(() => {
-    console.log("fetch data")
-    
+  useEffect(() => {    
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -521,8 +521,14 @@ export default function Matches() {
 
               <div className="px-4 space-y-3">
                 {dayMatches?.map((match) => (
-                  // <div id={match.id} className="">{match.id}</div>
-                  <MatchCard key={match.id} match={match} bet={dayBets?.find((bet) => bet?.matchId === match?.id)} fetchedBetData={fetchedBetData} onChange={handleBetChange} disabled={match.status === "finished"} />
+                  <MatchCard 
+                    key={match.id} 
+                    match={match} 
+                    bet={dayBets?.find((bet) => bet?.matchId === match?.id)} 
+                    fetchedBetData={fetchedBetData} 
+                    onChange={handleBetChange} 
+                    disabled={match.status === "finished"} 
+                  />
                 ))}
               </div>
 

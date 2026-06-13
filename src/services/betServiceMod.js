@@ -78,6 +78,7 @@ const matchDateTime = new Date(match.utcDate);
 export async function saveBet(userId, betData) {
     console.log('saveBet', userId, betData)
     const canBet = await canBetOnMatch(betData)
+    // const canBet = true
 console.log('canBet: ',canBet)
     if (!canBet) {
         return null

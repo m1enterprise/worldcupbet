@@ -6,7 +6,6 @@ import { format, parseISO } from "date-fns";
 import { pl } from "date-fns/locale";
 import { Trophy, Table2, Star, BarChart3, Save, LogOut, Target, LoaderPinwheel, Users, Search } from "lucide-react";
 import { toast } from "sonner";
-import { TEAMS, TOP_SCORERS } from "../lib/matchData";
 
 const PHASE_NAMES = {
   group: "Faza grupowa", round_of_32: "1/16 finału", round_of_16: "1/8 finału",
@@ -14,7 +13,6 @@ const PHASE_NAMES = {
 };
 
 function calculateMatchPoints(bet, result) {
-
   console.log("BET=", bet)
   console.log("SCO=", result)
 
@@ -38,6 +36,162 @@ function calculateMatchPoints(bet, result) {
   if (!exact && betOut === "draw" && actOut === "draw" && betExt && actExt && betExt === actExt)
     return { points: 5, reason: "Trafiony remis + zwycięzca" };
   return { points: 0, reason: "Nietrafiony" };
+}
+
+function MatchCard({ match, fetchedBetData}) {
+  const isKnockout = match?.stage !== "GROUP_STAGE";
+  const isFinished = match?.status === "FINISHED";
+
+  // const fetchedBet = fetchedBetData?.find((bet) => String(bet?.matchId) === String(match?.id))
+  const fetchedBet = fetchedBetData
+  const pointsInfo = calcMatchPoints(fetchedBetData, match)
+
+  console.log("MATCH", match.id, match)
+  console.log("BET", match.id, fetchedBetData)
+
+  console.log("TEST", match.id, fetchedBet.homeScore)
+
+  // let pointsInfo = null;
+  // if (isFinished && fetchedBet && fetchedBet.homeScore !== "" && fetchedBet.homeScore !== undefined) {
+  //   pointsInfo = calcMatchPoints(fetchedBet, { homeScore: match.score.fullTime.homeScore, awayScore: match.score.fullTime.awayScore, extraTimeWinner: match.score.fullTime?.extraTimeWinner, phase: match.phase });
+  // }
+  console.log("CALC:",match.id, pointsInfo)
+
+  // const match_t = `${Number(match.utcDate.slice(-9, -7))+2}${String(match.utcDate.slice(-7, -4))}`
+  // const match_t = `${String((Number(match.utcDate.slice(-9, -7)) + 2) % 24).padStart(2, '0')}${match.utcDate.slice(-7, -4)}`;
+  const match_t = match.utcDate
+
+  // console.log("POINTS", pointsInfo)
+  // console.log("MATCH_T", match_t)
+  // console.log("MATCH", match.id)
+  // console.log("FETCHED_BET", fetchedBet)
+
+  return (
+    <div className={`relative bg-card rounded-2xl border border-border overflow-hidden transition-all ${isFinished ? "opacity-70" : "shadow-sm hover:shadow-md"}`}>
+      <div className="flex items-center justify-between px-4 pt-3">
+        <div className="flex items-start gap-2 text-muted-foreground"> 
+          {match.group && <span className="text-[10px] font-medium rounded-full">{match.group.slice(-1)}</span>}
+          {isKnockout && <span className="text-[10px] font-bold px-2 py-0.5 bg-primary/10 text-primary rounded-full">{PHASE_NAMES[match.phase]}</span>}
+          {match.status === "live" && <span className="text-[10px] font-bold px-2 py-0.5 bg-red-500 text-white rounded-full animate-pulse">NA ŻYWO</span>}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-muted-foreground font-medium">
+            {
+              match_t?.slice(-9,-4)
+            }
+          </span>
+        </div>
+      </div>
+
+      <div className="px-4 py-3 flex items-center gap-3">
+         {
+            !useIsMobile() && (
+              <div className="flex-1 flex items-center gap-2.5 justify-start min-w-0">
+                <div className="w-12 h-8">
+                  <img   className="w-full h-full object-cover rounded-[4px]"
+                    src={match?.homeTeam?.crest}/>
+                </div>
+                <div className="min-w-0 text-left">
+                  <p className="text-sm font-bold">{match?.homeTeam?.name}</p>
+                  <p className="text-[10px] text-muted-foreground font-medium">{match?.homeTeam?.tla}</p>
+                </div>                    
+              </div>
+            )
+          }
+          {
+            useIsMobile() && (
+              <div className="flex-1 flex items-center gap-2.5 justify-start min-w-0"> 
+                <div className="w-12 h-8">
+                  <img   className="w-full h-full object-cover rounded-[4px]"
+                    src={match?.homeTeam?.crest}/>
+                </div>
+                <div className="min-w-0 text-left">
+                  <p className="text-sm font-bold">{match?.homeTeam?.tla}</p>
+                </div> 
+              </div>
+            )
+          }
+
+          {
+          // fetchedBet && (
+          // <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1">
+          //     <span className="text-[11px] text-muted-foreground font-medium">BET</span>
+          //     <span className="text-[11px] text-muted-foreground font-medium">{fetchedBet?.homeScore} : {fetchedBet?.awayScore}</span>
+          // </div>
+          // )
+          }
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            {isFinished && (
+              <div className="flex items-center gap-1">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+                  <span className="text-lg font-bold">{match?.score?.fullTime?.home}</span>
+                </div>
+                <span className="text-muted-foreground font-bold">:</span>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+                  <span className="text-lg font-bold">{match?.score?.fullTime?.away}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {
+            !useIsMobile() && (
+              <div className="flex-1 flex items-center gap-2.5 justify-end min-w-0">
+                <div className="min-w-0 text-right">
+                  <p className="text-sm font-bold">{match?.awayTeam?.name}</p>
+                  <p className="text-[10px] text-muted-foreground font-medium">{match?.awayTeam?.tla}</p>
+                </div>                    
+                <div className="w-12 h-8">
+                  <img   className="w-full h-full object-cover rounded-[4px]"
+                    src={match?.awayTeam?.crest}/>
+                </div>
+              </div>
+            )
+          }
+          {
+            useIsMobile() && (
+              <div className="flex-1 flex items-center gap-2.5 justify-end min-w-0">                   
+                <div className="min-w-0 text-left">
+                  <p className="text-sm font-bold">{match?.awayTeam?.tla}</p>
+                </div> 
+                <div className="w-12 h-8">
+                  <img   className="w-full h-full object-cover rounded-[4px]"
+                    src={match?.awayTeam?.crest}/>
+                </div>
+              </div>
+            )
+          }
+      </div> 
+
+      {(
+        <div className="px-4 pb-3">
+          <div className={`bg-muted/50 rounded-lg px-3 py-2 text-xs flex items-center justify-between bg-gradient-to-r from-white/10 via-white/10 ${
+            !isFinished
+              ? 'to-gray-100'
+              : pointsInfo?.points > 0
+                ? 'to-green-100'
+                : 'to-red-100'
+            }`}>
+            <span>
+              <span className="text-muted-foreground">BET </span>
+              <span className="font-bold">{fetchedBet?.homeScore} : {fetchedBet?.awayScore}</span>
+            </span>
+            
+            {pointsInfo && isFinished ?
+              <span>
+                <span className="font-bold">{pointsInfo?.points}</span> 
+                <span className=""> PKT</span>
+              </span>
+              :
+              <div className="text-muted-foreground">OCZEKUJE</div>
+            }
+            
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function BottomNav() {
@@ -90,149 +244,13 @@ function Header({ username }) {
   );
 }
 
-// Searchable dropdown list picker
-function SearchablePicker({ options, value, onChange, placeholder }) {
-  const [query, setQuery] = useState("");
-  const [open, setOpen] = useState(false);
-
-  console.log(94, options)
-
-  // const filtered = useMemo(() => {
-  //   if (!query) return options;
-  //   return options.filter((o) =>
-  //     o?.name.toLowerCase().includes(query.toLowerCase())
-  //   );
-  // }, [options, query]);
-
-  const filtered = options
-  .map((player) => {
-    const name = player.name.toLowerCase();
-    const q = query.toLowerCase().trim();
-
-    let score = 0;
-
-    // Exact match
-    if (name === q) score += 100;
-
-    // Starts with query
-    if (name.startsWith(q)) score += 50;
-
-    // Any word starts with query
-    if (name.split(" ").some((word) => word.startsWith(q))) score += 30;
-
-    // Contains query
-    if (name.includes(q)) score += 20;
-
-    return { player, score };
-  })
-  .filter((x) => x.score > 0)
-  .sort((a, b) => b.score - a.score)
-  .map((x) => x.player);
-
-  const selected = options.find((o) => o?.name === value);
-
-  return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => { setOpen((v) => !v); setQuery(""); }}
-        className="w-full h-11 rounded-xl border border-border bg-background text-sm px-3 text-left flex items-center justify-between focus:outline-none focus:border-primary transition-colors"
-      >
-        {selected ? (
-          <span className="font-medium">{selected?.name}</span>
-        ) : (
-          <span className="text-muted-foreground">{placeholder}</span>
-        )}
-        <span className="text-muted-foreground text-xs">▼</span>
-      </button>
-
-      {open && (
-        // <div className="absolute z-50 left-0 right-0 top-12 bg-card border border-border rounded-xl shadow-xl overflow-hidden">
-        //   <div className="p-2 border-b border-border">
-        //     <div className="relative">
-        //       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-        //       <input
-        //         autoFocus
-        //         value={query}
-        //         onChange={(e) => setQuery(e.target.value)}
-        //         placeholder="Szukaj..."
-        //         className="w-full pl-8 pr-3 h-8 rounded-lg bg-background border border-border text-sm focus:outline-none focus:border-primary"
-        //       />
-        //     </div>
-        //   </div>
-        //   <div className="absolute max-h-56 overflow-y-auto">
-        //     {options.length === 0 ? (
-        //       <p className="text-xs text-muted-foreground text-center py-4">Brak wyników</p>
-        //     ) : (
-        //       options.map((o) => (
-        //         <button
-        //           key={o.id}
-        //           type="button"
-        //           onClick={() => { onChange(o.name); setOpen(false); setQuery(""); }}
-        //           className={`w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors flex items-center gap-2 ${o?.name === value ? "bg-primary/10 text-primary font-semibold" : ""}`}
-        //         >
-        //           {o?.name}
-        //         </button>
-        //       ))
-        //     )}
-        //   </div>
-        // </div>
-
-        <div className="relative">
-  {/* Search input */}
-  <div className="relative">
-    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-    <input
-      autoFocus
-      value={query}
-      onChange={(e) => setQuery(e.target.value)}
-      placeholder="Szukaj..."
-      className="w-full pl-8 pr-3 h-8 rounded-lg bg-background border border-border text-sm"
-    />
-  </div>
-
-  {/* Dropdown */}
-  <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-card border border-border rounded-xl shadow-xl max-h-56 overflow-y-auto">
-    {filtered.length === 0 ? (
-      <p className="text-xs text-muted-foreground text-center py-4">
-        Brak wyników
-      </p>
-    ) : (
-      filtered.map((o) => (
-        <button
-          key={o.id}
-          type="button"
-          onClick={() => {
-            onChange(o.name);
-            setOpen(false);
-            setQuery("");
-          }}
-          className={`w-full text-left px-4 py-2.5 text-sm hover:bg-muted transition-colors flex items-center gap-2 ${
-            o.name === value
-              ? "bg-primary/10 text-primary font-semibold"
-              : ""
-          }`}
-        >
-          {o.name}
-        </button>
-      ))
-    )}
-  </div>
-</div>
-      )}
-    </div>
-  );
-}
-
-// import myBets from "../lib/my_bets.json";
-// import wcData from "../lib/wc_data.json";
 import { getMatches } from "../services/matchService";
 import { getBets, getBetsByUserId, getBonusBetByUserId, pushBonusBet } from "../services/betService";
-// import worldCupData from "../lib/players.json"
 
 import playersData from "../lib/playersData.json"
 import teamsData from "../lib/teamsData.json"
 import { calcMatchPoints } from "../services/calcPointsService";
+import { useIsMobile } from "../hooks/use-mobile";
 
 export default function MyBets() {
   const navigate = useNavigate();
@@ -247,48 +265,6 @@ export default function MyBets() {
   const [fetchedBonusData, setFetchedBonusData] = useState([])
   const [matchesFullBet, setMatchesFullBet] = useState([])
 
-  // const [footballPlayers, setFootballPlayers] = useState([worldCupData.teams]) // footballPlayers.map(item)=>{item.squad}
-  // const [footballTeams, setFootballTeams] = useState([worldCupData.teams])
-
-  // const [footballPlayers, setFootballPlayers] = useState([])
-  useEffect(()=>{
-    console.log(1, playersData)
-    console.log(2, teamsData)
-  },[])
-
-    // Teams list sorted alphabetically
-  const teamOptions = useMemo(() => {
-    return Object.values(TEAMS)
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map((t) => ({ value: t.code, label: `${t.flag} ${t.name}` }));
-  }, []);
-
-  // Players list sorted by team flag + name
-  const playerOptions = useMemo(() => {
-    return TOP_SCORERS
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map((p) => {
-        const team = TEAMS[p.team];
-        return { value: p.name, label: `${team?.flag ?? ""} ${p.name} (${team?.name ?? p.team})` };
-      });
-  }, []);
-
-  const handleBonusChange = (key, value) => setBonusBets((prev) => ({ ...prev, [key]: value }));
-
-  const saveBonuses = async () => {
-    const bonusData = {
-      "bonusUserId": session.id,
-      "bonusChampion": bonusBets.champion,
-      "bonusScorer": bonusBets.topScorer,
-      "bonusAssister": bonusBets.topAssister
-    }
-
-        console.log(192, bonusData)
-    const data = await pushBonusBet(session.id, bonusData)
-    if (!data) return toast.error("Bonus nie zostal dodany / zmieniony.")
-    toast.success("Bonusy zapisane!");
-  };
-
   useEffect(() => {
     const fetchData = async () => {
       // BETS BY USER ID
@@ -298,8 +274,8 @@ export default function MyBets() {
       // ALL MATCHES
       const data = await getMatches();
       if (!data) return console.log('No match data found');
-      
-      // edit match UTC time
+
+        // edit match UTC time
         function utcToPolandIso(utcString) {
           const date = new Date(utcString);
           const parts = new Intl.DateTimeFormat('sv-SE', {
@@ -319,7 +295,6 @@ export default function MyBets() {
         
         data.map(match=>{
             const match_t = utcToPolandIso(match.utcDate)
-            console.log(match.matchId, match_t)
             match.utcDate = match_t
         })
 
@@ -355,106 +330,20 @@ export default function MyBets() {
     fetchData();
   }, []);
 
-  // const betEntries = useMemo(() => {
-  //   return Object.entries(bets)
-  //     .map(([matchId, bet]) => {
-  //       const match = matches.find((m) => m.id === parseInt(matchId));
-  //       if (!match) return null;
-  //       return { matchId: parseInt(matchId), bet, match };
-  //     })
-  //     ?.filter(Boolean)
-  //     ?.sort((a, b) => a.match?.date?.localeCompare(b.match.date));
-  // }, [bets, matches]);
-
-  // const teamOptions = useMemo(() => {
-  //   const seen = new Set();
-  //   return matches
-  //     .filter((m) => m.homeTeam !== "TBD")
-  //     .flatMap((m) => [
-  //       { code: m.homeTeam, name: m.homeName, flag: m.homeFlag },
-  //       { code: m.awayTeam, name: m.awayName, flag: m.awayFlag },
-  //     ])
-  //     .filter((t) => { if (seen.has(t.code)) return false; seen.add(t.code); return true; })
-  //     .sort((a, b) => a?.name?.localeCompare(b.name));
-  // }, [matches]);
-
-  // const handleBonusChange = (key, value) => setBonusBets((prev) => ({ ...prev, [key]: value }));
-
-  // const saveBonuses = () => {
-  //   saveBonusBets(bonusBets);
-  //   toast.success("Bonusy zapisane!");
-  // };
-
-  // if (!session) return null;
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header username={session?.username} />
       <main className="flex-1 pb-24">
         <div className="max-w-2xl mx-auto px-4 py-4 space-y-6">
-          {/* Bonus bets */}
-
+    
           {/* Bet history */}
           <div>
             <h2 className="font-display text-base font-bold mb-3 flex items-center gap-2">
               <Target className="w-5 h-5 text-primary" />
               Postawione typy ({userBets?.length})
-            </h2>
+            </h2> 
 
-            {/* {userBets?.length === 0 && (
-              <div className="bg-card rounded-2xl border border-border p-8 text-center">
-                <p className="text-muted-foreground text-sm">Nie postawiłeś jeszcze żadnych typów.</p>
-                <p className="text-muted-foreground text-xs mt-1">Przejdź do zakładki „Mecze" aby obstawiać.</p>
-              </div>
-            )} */}
-
-            {/* {userBets.length > 0 && (
-              <div className="space-y-4">
-                {userBets.map((bet) => (
-                  <div id={bet.id} className={`bg-card rounded-2xl border border-border overflow-hidden transition-all ${bet.status === 'finished' ? "opacity-80" : "shadow-sm hover:shadow-md"}`}>
-
-                  <div key={bet.matchId} className="px-4 py-3 flex items-center gap-3">
-                  
-                    <div className="flex-1 flex items-center gap-2.5 min-w-0">
-                      <div className="w-12 h-8">
-                        <img className="w-full h-full object-cover rounded-[4px]"
-                          src={bet.homeTeam.crest}/>
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold truncate">{bet.homeTeam.name}</p>
-                        <p className="text-[10px] text-muted-foreground font-medium">{bet.homeTeam.tla}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
-                        <span className="text-lg font-bold">{bet.homeScore}</span>
-                      </div>
-                      <span className="text-muted-foreground font-bold">:</span>
-                      <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center">
-                        <span className="text-lg font-bold">{bet.awayScore}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex-1 flex items-center gap-2.5 justify-end min-w-0">
-                      <div className="min-w-0 text-right">
-                        <p className="text-sm font-bold truncate">{bet.awayTeam.name}</p>
-                        <p className="text-[10px] text-muted-foreground font-medium">{bet.awayTeam.tla}</p>
-                      </div>                    
-                      <div className="w-12 h-8">
-                        <img className="w-full h-full object-cover rounded-[4px]"
-                          src={bet.awayTeam.crest}/>
-                      </div>
-                    </div>
-
-                  </div>
-
-                  </div>
-                ))}
-              </div>
-            )} */}
-
-    <div className="bg-card rounded-2xl border border-border p-3 text-center mb-1.5">
+    <div className="bg-card rounded-2xl border border-border p-3 text-center mb-3">
             <p className="text-muted-foreground text-sm">
               BONUS BET
             </p>
@@ -472,7 +361,7 @@ export default function MyBets() {
             </label>
       </div>
 
-    {userBets.length === 0 ? (
+    {userBets.length === 0 && (
           <div className="bg-card rounded-2xl border border-border p-8 text-center">
             <p className="text-muted-foreground text-sm">
               Nie postawiłeś jeszcze żadnych typów.
@@ -481,106 +370,132 @@ export default function MyBets() {
               Przejdź do zakładki „Mecze" aby obstawiać.
             </p>
           </div>
-        ) : (
-          <div className="space-y-2">
-            {userBets.map((match) => {
-              
-              const isFinished = match.status === "FINISHED";
-              let pointsInfo = null;
-              // if (isFinished) {
-              //   pointsInfo = calculateMatchPoints(match, {
-              //     homeScore: matchBet?.score?.fullTime?.home,
-              //     awayScore: matchBet?.score?.fullTime?.away,
-              //     extraTimeWinner: matchBet?.score?.extraTimeWinner,
-              //     phase: matchBet?.phase,
-              //   });
-              // }
+        )} 
+        
+        {userBets?.length > 0 && (
+          <div className="px-0 space-y-3">
+            {userBets?.map(bet=>{
+              // filter BET MATCH FULL INFO
+              const betMatchFullInfo = matches.filter(match=> String(match.id) === String(bet.matchId))?.[0]
 
-              console.log("matches full bet", matchesFullBet)
+              // console.log(352, betMatchFullInfo)
+              console.log("BET_BEFORE", bet)
+              console.log("MATCH_FULL_BEFORE", betMatchFullInfo)
 
-              // filter matchesFullBet for this matchId
-              const matchBetData = matchesFullBet?.filter((item)=>String(item?.id) === String(match?.matchId))?.[0]
-              const userBetInfo = calcMatchPoints(match, matchBetData)
-              console.log("CALC_BET_SCR: ", userBetInfo)
               return (
-                <div
-                  key={match.id}
-                  className="bg-card rounded-xl border border-border p-3"
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[10px] text-muted-foreground font-medium">
-                      {format(parseISO(match.matchUtcDate), "d MMM", { locale: pl })} •{" "}
-                      {match.group
-                        ? `Gr. ${match.group.slice(-1)}`
-                        : PHASE_NAMES[match.phase]}
-                    </span>
-                    {userBetInfo && matchBetData?.status === "FINISHED" && (
-                      <>
-                      <div className="text-[12px] font-bold text-center">
-                        {matchBetData?.score?.fullTime.home}:{matchBetData?.score?.fullTime.away}
-                      </div>
-                      <div
-                        className={`text-[12px] font-bold ${
-                          userBetInfo.points > 0
-                            ? "text-green-700"
-                            : "text-red-500"
-                        }`}
-                      >
-                        {userBetInfo.points} pkt
-                      </div>
-                      </>
-                    )}
-                    {!(matchBetData?.status === "FINISHED") && (
-                      <div variant="secondary" className="text-[10px]">
-                        Oczekuje
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
+                  <MatchCard
+                    key={bet?.matchId} 
 
-                    <div className="w-12 h-8">
-                        <img className="w-full h-full object-cover rounded-[4px]"
-                          src={match.homeTeam.crest}/>
-                    </div>
-                    <span className="text-xs font-semibold flex-1 truncate">
-                      {match.homeTeam.name}
-                    </span>
-                    <span className="text-sm font-bold bg-muted rounded-lg px-2.5 py-1">
-                      {match.homeScore} : {match.awayScore}
-                    </span>
-                    <span className="text-xs font-semibold flex-1 truncate text-right">
-                      {match.awayTeam.name}
-                    </span>
-                    <div className="w-12 h-8">
-                        <img className="w-full h-full object-cover rounded-[4px]"
-                          src={match.awayTeam.crest}/>
-                    </div>
-                    
-                    
-                  </div>
+                    // BET MATCH FULL INFO
+                    match={betMatchFullInfo}
 
-                  {match.extraTimeWinner && (
-                    <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
-                      Wygra po dogrywce:{" "}
-                      <span className="font-bold">
-                        {match.extraTimeWinner === "home"
-                          ? match.homeTeam.name
-                          : match.awayTeam.name}
-                      </span>
-                    </p>
-                  )}
+                    // BET INFO
+                    fetchedBetData={bet}
 
-                  {/* {isFinished && pointsInfo && (
-                    <p className="text-[10px] text-muted-foreground mt-1 text-center">
-                      Wynik: {bet.score}:{match.awayScore} • {pointsInfo.reason}
-                    </p>
-                  )} */}
-                </div>
-              );
+                    // BET CALC POINTS INFO
+                    // betCalcPointsInfo={[]} 
+                  />
+              )
             })}
-          </div>
+          </div>  
         )}
 
+        { 
+          //     const isFinished = match.status === "FINISHED";
+          //     let pointsInfo = null;
+          //     // if (isFinished) {
+          //     //   pointsInfo = calculateMatchPoints(match, {
+          //     //     homeScore: matchBet?.score?.fullTime?.home,
+          //     //     awayScore: matchBet?.score?.fullTime?.away,
+          //     //     extraTimeWinner: matchBet?.score?.extraTimeWinner,
+          //     //     phase: matchBet?.phase,
+          //     //   });
+          //     // }
+
+          //     console.log("matches full bet", matchesFullBet)
+
+          //     // filter matchesFullBet for this matchId
+          //     const matchBetData = matchesFullBet?.filter((item)=>String(item?.id) === String(match?.matchId))?.[0]
+          //     const userBetInfo = calcMatchPoints(match, matchBetData)
+          //     console.log("CALC_BET_SCR: ", userBetInfo)
+          //     return (
+          //       <div
+          //         key={match.id}
+          //         className="bg-card rounded-xl border border-border p-3"
+          //       >
+          //         <div className="flex items-center justify-between mb-1.5">
+          //           <span className="text-[10px] text-muted-foreground font-medium">
+          //             {format(parseISO(match.matchUtcDate), "d MMM", { locale: pl })} •{" "}
+          //             {match.group
+          //               ? `Gr. ${match.group.slice(-1)}`
+          //               : PHASE_NAMES[match.phase]}
+          //           </span>
+          //           {userBetInfo && matchBetData?.status === "FINISHED" && (
+          //             <>
+          //             <div className="text-[12px] font-bold text-center">
+          //               {matchBetData?.score?.fullTime.home}:{matchBetData?.score?.fullTime.away}
+          //             </div>
+          //             <div
+          //               className={`text-[12px] font-bold ${
+          //                 userBetInfo.points > 0
+          //                   ? "text-green-700"
+          //                   : "text-red-500"
+          //               }`}
+          //             >
+          //               {userBetInfo.points} pkt
+          //             </div>
+          //             </>
+          //           )}
+          //           {!(matchBetData?.status === "FINISHED") && (
+          //             <div variant="secondary" className="text-[10px]">
+          //               Oczekuje
+          //             </div>
+          //           )}
+          //         </div>
+          //         <div className="flex items-center gap-2">
+
+          //           <div className="w-12 h-8">
+          //               <img className="w-full h-full object-cover rounded-[4px]"
+          //                 src={match.homeTeam.crest}/>
+          //           </div>
+          //           <span className="text-xs font-semibold flex-1 truncate">
+          //             {match.homeTeam.name}
+          //           </span>
+          //           <span className="text-sm font-bold bg-muted rounded-lg px-2.5 py-1">
+          //             {match.homeScore} : {match.awayScore}
+          //           </span>
+          //           <span className="text-xs font-semibold flex-1 truncate text-right">
+          //             {match.awayTeam.name}
+          //           </span>
+          //           <div className="w-12 h-8">
+          //               <img className="w-full h-full object-cover rounded-[4px]"
+          //                 src={match.awayTeam.crest}/>
+          //           </div>
+                    
+                    
+          //         </div>
+
+          //         {match.extraTimeWinner && (
+          //           <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
+          //             Wygra po dogrywce:{" "}
+          //             <span className="font-bold">
+          //               {match.extraTimeWinner === "home"
+          //                 ? match.homeTeam.name
+          //                 : match.awayTeam.name}
+          //             </span>
+          //           </p>
+          //         )}
+
+          //         {/* {isFinished && pointsInfo && (
+          //           <p className="text-[10px] text-muted-foreground mt-1 text-center">
+          //             Wynik: {bet.score}:{match.awayScore} • {pointsInfo.reason}
+          //           </p>
+          //         )} */}
+          //       </div>
+          //     );
+          //   })}
+          // </div>
+        }
           </div>
         </div>
       </main>
