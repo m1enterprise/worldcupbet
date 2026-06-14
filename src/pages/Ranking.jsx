@@ -106,12 +106,6 @@ export default function Ranking() {
             users.map(user=>{
               // users bets filter
               const userBets = bets.filter(bet=>String(bet.userId) === String(user.id))
-              // console.log("USEER", userBets)
-
-              // matches full info by betId filter
-              // const userBetsMatchInfo = matches.filter(match=>userBets.some(bet=> String(match.id) === String(bet.matchId)))
-              // console.log("USEER_MATCHES", userBetsMatchInfo)
-
               
               // object per user
               const userObject = {
@@ -123,13 +117,9 @@ export default function Ranking() {
                 userBets: [],
               }
 
-
               userBets.map(bet=>{
                 const matchBetData = matches?.filter((item)=>String(item?.id) === String(bet?.matchId))?.[0]
-                // console.log(user.id, matchBetData)
                 const userBetInfo = calcMatchPoints(bet, matchBetData)
-                // console.log("CALC_BET_SCR: ", user.id, userBetInfo)
-
                 userObject.userBets.push(userBetInfo)
               })
 
