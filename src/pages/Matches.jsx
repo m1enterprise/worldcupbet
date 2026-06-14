@@ -164,10 +164,13 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
 
   const handleExt = (value) => onChange(match.id, { ...bet, homeScore: bH, awayScore: bA, extraTimeWinner: value });
 
-  let pointsInfo = null;
-  if (isFinished && bet && bet.homeScore !== "" && bet.homeScore !== undefined) {
-    pointsInfo = calculateMatchPoints(bet, { homeScore: match.homeScore, awayScore: match.awayScore, extraTimeWinner: match.extraTimeWinner, phase: match.phase });
-  }
+  // let pointsInfo = null;
+  // if (isFinished && bet && bet.homeScore !== "" && bet.homeScore !== undefined) {
+  //   pointsInfo = calculateMatchPoints(bet, { homeScore: match.homeScore, awayScore: match.awayScore, extraTimeWinner: match.extraTimeWinner, phase: match.phase });
+  // }
+
+  // bet, match
+  const pointsInfo = calcMatchPoints(bet, fetchedBetData)
 
   console.log("MATCH", match.id, match)
   console.log("BET", match.id, bet)
@@ -228,12 +231,14 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
             )
           }
 
-          {fetchedBet && (
-          <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1">
-              <span className="text-[11px] text-muted-foreground font-medium">BET</span>
-              <span className="text-[11px] text-muted-foreground font-medium">{fetchedBet.homeScore} : {fetchedBet.awayScore}</span>
-          </div>
-          )}
+          {
+          // fetchedBet && (
+          // <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1">
+          //     <span className="text-[11px] text-muted-foreground font-medium">BET</span>
+          //     <span className="text-[11px] text-muted-foreground font-medium">{fetchedBet.homeScore} : {fetchedBet.awayScore}</span>
+          // </div>
+          // )
+          }
 
         <div className="flex items-center gap-1.5 shrink-0">
           {isFinished ? (
@@ -306,11 +311,40 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
         </div>
       )}
 
-      {isFinished && bet && (
+      {
+      // isFinished && bet && (
+      //   <div className="px-4 pb-3">
+      //     <div className="bg-muted/50 rounded-lg px-3 py-2 text-xs flex items-center justify-between">
+      //       <span><span className="text-muted-foreground">Twój typ: </span><span className="font-bold">{bet.homeScore} : {bet.awayScore}</span></span>
+      //       {pointsInfo && <span className="text-muted-foreground">{pointsInfo.reason}</span>}
+      //     </div>
+      //   </div>
+      // )
+      }
+
+      {(
         <div className="px-4 pb-3">
-          <div className="bg-muted/50 rounded-lg px-3 py-2 text-xs flex items-center justify-between">
-            <span><span className="text-muted-foreground">Twój typ: </span><span className="font-bold">{bet.homeScore} : {bet.awayScore}</span></span>
-            {pointsInfo && <span className="text-muted-foreground">{pointsInfo.reason}</span>}
+          <div className={`bg-muted/50 rounded-lg px-3 py-2 text-xs flex items-center justify-between bg-gradient-to-r from-white/10 via-white/10 ${
+            !isFinished
+              ? 'to-gray-100'
+              : pointsInfo?.points > 0
+                ? 'to-green-100'
+                : 'to-red-100'
+            }`}>
+            <span>
+              <span className="text-muted-foreground">BET </span>
+              <span className="font-bold">{fetchedBet?.homeScore} : {fetchedBet?.awayScore}</span>
+            </span>
+            
+            {pointsInfo && isFinished ?
+              <span>
+                <span className="font-bold">{pointsInfo?.points}</span> 
+                <span className=""> PKT</span>
+              </span>
+              :
+              <div className="text-muted-foreground">OCZEKUJE</div>
+            }
+            
           </div>
         </div>
       )}
@@ -324,6 +358,7 @@ import { getMatches } from "../services/matchService";
 import { getUserBets, saveBet } from "../services/betServiceMod";
 import { getBetsByUserId } from "../services/betService";
 import { useIsMobile } from "../hooks/use-mobile";
+import { calcMatchPoints } from "../services/calcPointsService";
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Matches() {
