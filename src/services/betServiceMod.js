@@ -38,17 +38,11 @@ export async function canBetOnMatch(betData) {
 
 //   const matchDateTime = parseMatchDateTime(match.date, match.time);
 //   const matchDateTime = parseMatchDateTime(match.utcDate);
-const matchDateTime = new Date(match.utcDate);
-
-    console.log("check match when", matchDateTime)
-
 //   if (!matchDateTime) return true; // brak daty - pozwól obstawiać
 
+  const matchDateTime = new Date(match.utcDate);
   const now = new Date();
   const ctf = new Date(matchDateTime.getTime() - CUTOFF_MINUTES * 60 * 1000);
-  console.log(now)
-  console.log(ctf)
-  console.log(now<ctf)
   return now < ctf;
 }
 

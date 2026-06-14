@@ -199,7 +199,7 @@ function BottomNav() {
   const items = [
     { path: "/", icon: LoaderPinwheel, label: "Mecze" },
     { path: "/standings", icon: Table2, label: "Tabele" },
-    { path: "/my-bets", icon: Star, label: "Moje typy" },
+    { path: "/my-bets", icon: Star, label: "Bety" },
     // { path: "/points", icon: BarChart3, label: "Punkty" },
     { path: "/ranking", icon: Users, label: "Ranking" },
   ];
@@ -251,6 +251,7 @@ import playersData from "../lib/playersData.json"
 import teamsData from "../lib/teamsData.json"
 import { calcMatchPoints } from "../services/calcPointsService";
 import { useIsMobile } from "../hooks/use-mobile";
+import { getUsers } from "../services/userService";
 
 export default function MyBets() {
   const navigate = useNavigate();
@@ -262,8 +263,10 @@ export default function MyBets() {
   const [userBets, setUserBets] = useState([]);
   const [bonusBets, setBonusBets] = useState({});
   const bets = useMemo(() => loadBets(), []);
+  const [allUsersBet, setAllUsersBet] = useState([])
   const [fetchedBonusData, setFetchedBonusData] = useState([])
   const [matchesFullBet, setMatchesFullBet] = useState([])
+  const [currentMatch, setCurrentMatch] = useState([])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -305,13 +308,35 @@ export default function MyBets() {
         setMatches(sorted || []);
         const matchesFullBetData = data.filter((match) => bet_data.some((bet) => String(bet.matchId) === String(match.id)));
 
+        // SET CURRENT MATCH
+        const currentMatchSort = sorted?.filter(match=>match.status !== "FINISHED")?.[0];
+        const matchDateTime = new Date(currentMatchSort.utcDate);
+        const now = new Date();
+        const ctf = new Date(matchDateTime.getTime());
+
+        const isStarted = now > ctf;
+
+        currentMatchSort.isStarted = isStarted
+        
+        console.log('current match info: ', currentMatchSort)
+        setCurrentMatch(currentMatchSort)
+
+        // ALL USERS BET FOR THE CURRENT MATCH
+        const all_bets = await getBets()
+        const all_bets_sort = all_bets.filter(bet=> String(bet.matchId) === String(currentMatchSort.id))
+
+        const all_users = await getUsers()
+        all_bets_sort.map(bet=>{
+          const getUser = all_users.filter(user=>String(user.id) === String(bet.userId))?.[0]
+          bet.username = getUser?.username
+        })
+        console.log("ALL_BETS_MOD", all_bets_sort)
+        setAllUsersBet(all_bets_sort)
+
       // BONUS BET BY USER ID
       const bonus_arr = await getBonusBetByUserId(session?.id)
       const bonus_data = bonus_arr[0]
       if (!bonus_data) return console.log('No user_bet data found');
-
-      console.log(1, bet_data[0])
-      console.log(2, data[0])
 
       // CALC USER POINTS
       // const userBetPoints = calcMatchPoints(bet_data[0], data[0])
@@ -339,27 +364,160 @@ export default function MyBets() {
           {/* Bet history */}
           <div>
             <h2 className="font-display text-base font-bold mb-3 flex items-center gap-2">
-              <Target className="w-5 h-5 text-primary" />
-              Postawione typy ({userBets?.length})
+              <LoaderPinwheel className="w-5 h-5 text-primary"/>
+              Najblizszy mecz
             </h2> 
 
-    <div className="bg-card rounded-2xl border border-border p-3 text-center mb-3">
-            <p className="text-muted-foreground text-sm">
-              BONUS BET
-            </p>
-            <label className="tracking-wide mb-1.5 block text-start text-[11px] font-medium">
-                  <span className="text-muted-foreground uppercase">🏆 Mistrz Świata: </span>
-                  <span className="text-xs font-semibold flex-1 truncate">{fetchedBonusData?.bonusChampion}</span>
-            </label>
-            <label className="tracking-wide mb-1.5 block text-start text-[11px] font-medium">
-                  <span className="text-muted-foreground uppercase">👟 Król Strzelców: </span>
-                  <span className="text-xs font-semibold flex-1 truncate">{fetchedBonusData?.bonusScorer}</span>
-            </label>
-            <label className="tracking-wide mb-1.5 block text-start text-[11px] font-medium">
-                  <span className="text-muted-foreground uppercase">👟 Król Asyst: </span> 
-                  <span className="text-xs font-semibold flex-1 truncate">{fetchedBonusData?.bonusAssister}</span>
-            </label>
+            <div className={`relative bg-card rounded-2xl border border-border overflow-hidden transition-all shadow-sm hover:shadow-md mb-3`}>
+      <div className="flex items-center justify-between px-4 pt-3">
+        <div className="flex items-start gap-2 text-muted-foreground"> 
+          {currentMatch.group && <span className="text-[10px] font-medium rounded-full">{currentMatch.group.slice(-1)}</span>}
+          {/* {isKnockout && <span className="text-[10px] font-bold px-2 py-0.5 bg-primary/10 text-primary rounded-full">{PHASE_NAMES[currentMatch.phase]}</span>} */}
+          {currentMatch.status === "live" && <span className="text-[10px] font-bold px-2 py-0.5 bg-red-500 text-white rounded-full animate-pulse">NA ŻYWO</span>}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-muted-foreground font-medium">
+            {
+              // currentMatch_t?.slice(-9,-4)
+            }
+          </span>
+        </div>
       </div>
+
+      <div className="px-4 py-3 flex items-center gap-3">
+         {
+            !useIsMobile() && (
+              <div className="flex-1 flex items-center gap-2.5 justify-start min-w-0">
+                <div className="w-12 h-8">
+                  <img   className="w-full h-full object-cover rounded-[4px]"
+                    src={currentMatch?.homeTeam?.crest}/>
+                </div>
+                <div className="min-w-0 text-left">
+                  <p className="text-sm font-bold">{currentMatch?.homeTeam?.name}</p>
+                  <p className="text-[10px] text-muted-foreground font-medium">{currentMatch?.homeTeam?.tla}</p>
+                </div>                    
+              </div>
+            )
+          }
+          {
+            useIsMobile() && (
+              <div className="flex-1 flex items-center gap-2.5 justify-start min-w-0"> 
+                <div className="w-12 h-8">
+                  <img   className="w-full h-full object-cover rounded-[4px]"
+                    src={currentMatch?.homeTeam?.crest}/>
+                </div>
+                <div className="min-w-0 text-left">
+                  <p className="text-sm font-bold">{currentMatch?.homeTeam?.tla}</p>
+                </div> 
+              </div>
+            )
+          }
+
+          {
+          // fetchedBet && (
+          // <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1">
+          //     <span className="text-[11px] text-muted-foreground font-medium">BET</span>
+          //     <span className="text-[11px] text-muted-foreground font-medium">{fetchedBet?.homeScore} : {fetchedBet?.awayScore}</span>
+          // </div>
+          // )
+          }
+
+          {!currentMatch?.isStarted && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1">
+                <span className="text-muted-foreground">vs</span>
+              </div>
+            </div>
+          )}
+
+          {currentMatch?.isStarted && 
+            (
+              <div className="flex items-center gap-1.5 shrink-0">
+              
+              <div className="flex items-center gap-1">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+                  <span className="text-lg font-bold">{currentMatch?.score?.fullTime?.home || 0}</span>
+                </div>
+                <span className="text-muted-foreground font-bold">:</span>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+                  <span className="text-lg font-bold">{currentMatch?.score?.fullTime?.away || 0}</span>
+                </div>
+              </div>
+            
+              </div>
+          )}
+
+          {
+            !useIsMobile() && (
+              <div className="flex-1 flex items-center gap-2.5 justify-end min-w-0">
+                <div className="min-w-0 text-right">
+                  <p className="text-sm font-bold">{currentMatch?.awayTeam?.name}</p>
+                  <p className="text-[10px] text-muted-foreground font-medium">{currentMatch?.awayTeam?.tla}</p>
+                </div>                    
+                <div className="w-12 h-8">
+                  <img   className="w-full h-full object-cover rounded-[4px]"
+                    src={currentMatch?.awayTeam?.crest}/>
+                </div>
+              </div>
+            )
+          }
+          {
+            useIsMobile() && (
+              <div className="flex-1 flex items-center gap-2.5 justify-end min-w-0">                   
+                <div className="min-w-0 text-left">
+                  <p className="text-sm font-bold">{currentMatch?.awayTeam?.tla}</p>
+                </div> 
+                <div className="w-12 h-8">
+                  <img   className="w-full h-full object-cover rounded-[4px]"
+                    src={currentMatch?.awayTeam?.crest}/>
+                </div>
+              </div>
+            )
+          }
+      </div> 
+
+      {!currentMatch?.isStarted && (
+        <div className="px-4 pb-3">
+          <div className={`bg-muted/50 rounded-lg px-3 py-2 text-center text-xs flex items-center justify-center bg-gradient-to-r from-white/10 via-white/10 ${'to-gray-100'}`}>  
+                <span className="text-muted-foreground text-center">BETY INNYCH USERÓW BĘDĄ DOSTĘPNE PO ROZPOCZĘCIU MECZU</span>
+          </div>
+        </div>
+      )}
+
+      {currentMatch?.isStarted && (
+        <div className="px-4 pb-3">
+        {allUsersBet?.map(userBet=>(
+          <div key={userBet.id} className={`mb-2 bg-muted/50 rounded-lg px-3 py-2 text-xs flex items-center justify-between bg-gradient-to-r from-white/10 via-white/10 ${'to-gray-100'}`}>
+              <span className="text-muted-foreground">BET USERA {userBet?.username}</span>
+              <span className="text-muted-foreground"> {userBet?.homeTeam?.tla} <span className="font-bold text-secondary">{userBet?.homeScore} : {userBet?.awayScore}</span> {userBet?.awayTeam?.tla}</span>
+          </div>
+        ))}
+        </div>
+      )}
+    </div>
+
+            <h2 className="font-display text-base font-bold mb-3 flex items-center gap-2">
+              <Target className="w-5 h-5 text-primary" />
+              Twoje bety ({userBets?.length})
+            </h2> 
+
+            <div className="bg-card rounded-2xl border border-border p-3 text-center mb-3">
+                    <p className="text-muted-foreground text-sm">
+                      BONUS BET
+                    </p>
+                    <label className="tracking-wide mb-1.5 block text-start text-[11px] font-medium">
+                          <span className="text-muted-foreground uppercase">🏆 Mistrz Świata: </span>
+                          <span className="text-xs font-semibold flex-1 truncate">{fetchedBonusData?.bonusChampion}</span>
+                    </label>
+                    <label className="tracking-wide mb-1.5 block text-start text-[11px] font-medium">
+                          <span className="text-muted-foreground uppercase">👟 Król Strzelców: </span>
+                          <span className="text-xs font-semibold flex-1 truncate">{fetchedBonusData?.bonusScorer}</span>
+                    </label>
+                    <label className="tracking-wide mb-1.5 block text-start text-[11px] font-medium">
+                          <span className="text-muted-foreground uppercase">👟 Król Asyst: </span> 
+                          <span className="text-xs font-semibold flex-1 truncate">{fetchedBonusData?.bonusAssister}</span>
+                    </label>
+              </div>
 
     {userBets.length === 0 && (
           <div className="bg-card rounded-2xl border border-border p-8 text-center">

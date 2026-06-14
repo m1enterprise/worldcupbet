@@ -52,7 +52,7 @@ function BottomNav() {
   const items = [
     { path: "/", icon: LoaderPinwheel, label: "Mecze" },
     { path: "/standings", icon: Table2, label: "Tabele" },
-    { path: "/my-bets", icon: Star, label: "Moje typy" },
+    { path: "/my-bets", icon: Star, label: "Bety" },
     // { path: "/points", icon: BarChart3, label: "Punkty" },
     { path: "/ranking", icon: Users, label: "Ranking" },
   ];
@@ -214,7 +214,7 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
             useIsMobile() && (
               <div className="flex-1 flex items-center gap-2.5 justify-start min-w-0"> 
                 <div className="w-12 h-8">
-                  <img   className="w-full h-full object-cover rounded-[4px]"
+                  <img className="w-full h-full object-cover rounded-[4px]"
                     src={match.homeTeam.crest}/>
                 </div>
 

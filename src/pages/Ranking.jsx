@@ -13,7 +13,7 @@ function BottomNav() {
   const items = [
     { path: "/", icon: LoaderPinwheel, label: "Mecze" },
     { path: "/standings", icon: Table2, label: "Tabele" },
-    { path: "/my-bets", icon: Star, label: "Moje typy" },
+    { path: "/my-bets", icon: Star, label: "Bet" },
     // { path: "/points", icon: BarChart3, label: "Punkty" },
     { path: "/ranking", icon: Users, label: "Ranking" },
   ];

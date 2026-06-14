@@ -9,7 +9,7 @@ export async function getBets() {
     console.error(error);
     return null;
   } else {
-    console.log('bets: ', data)
+    console.log('all_bets: ', data)
     return data;
   }
 }
