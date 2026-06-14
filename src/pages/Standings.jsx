@@ -96,9 +96,6 @@ function Table({ entry }) {
 
 // ─── Scorers Table ────────────────────────────────────────────────────────────
 function ScorersTable({ scorers, title, statKey }) {
-
-  console.log(scorers)
-
   return (
     <div className="bg-card rounded-2xl border border-border overflow-hidden">
       <div className="px-4 py-2.5 bg-secondary">
@@ -154,8 +151,6 @@ export default function Standings() {
 
         const scorers = await getScorers()
         setScorers(scorers)
-
-        console.log(scorers)
       };
       fetchData();
       setLoading(false);

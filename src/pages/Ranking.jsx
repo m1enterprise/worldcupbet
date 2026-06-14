@@ -102,7 +102,6 @@ export default function Ranking() {
             const matches = await getMatches()
 
             const usersBetCalcData = []
-
             // Calc punkty dla each usera
             users.map(user=>{
               // users bets filter

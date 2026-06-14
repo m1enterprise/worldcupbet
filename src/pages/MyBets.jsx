@@ -302,7 +302,6 @@ export default function MyBets() {
 
         // SET CURRENT MATCH
         const currentMatchSort = sorted?.filter(match=>match.status !== "FINISHED")?.[0];
-        console.log("CURRENT", currentMatchSort)
 
         // const matchDateTime = new Date(currentMatchSort.utcDate);
         // const currentMatch

@@ -146,11 +146,7 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
 
   const iso = new Date().toISOString();
 
-  console.log(iso);
   // np. "2026-06-14T18:42:15.123Z"
-
-  console.log(now)
-  console.log(ctf)
   // if (now > ctf) {
   //   return null
   // }
