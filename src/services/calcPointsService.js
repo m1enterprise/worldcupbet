@@ -160,19 +160,11 @@ export function calcPointsForAllUsers(bets, matches, bonusData = [], tournamentR
     // console.log(2, matches)
     // console.log(3, bonusData)
     // console.log(4, tournamentResults)
-
-
-
-    console.log('start calc')
-
   // Indeks meczów wg ID (string) dla O(1) lookup
   const matchIndex = {};
   matches.forEach((m) => {
     matchIndex[String(m.id)] = m;
   });
-
-      console.log('calc 1: ', matchIndex)
-
 
   // Zbierz bety per userId
   const userBetsMap = {};
@@ -182,9 +174,6 @@ export function calcPointsForAllUsers(bets, matches, bonusData = [], tournamentR
     if (!userBetsMap[uid]) userBetsMap[uid] = [];
     userBetsMap[uid].push(bet);
   });
-
-        console.log('calc 2: ', userBetsMap)
-
 
   // Przelicz punkty per user
   const results = Object.entries(userBetsMap).map(([userId, userBets]) => {
@@ -196,11 +185,7 @@ export function calcPointsForAllUsers(bets, matches, bonusData = [], tournamentR
     userBets.forEach((bet) => {
       const match = matchIndex[String(bet.match_id)];
       // Liczymy tylko zakończone mecze
-        console.log('calc for bet: ', bet.id)
-
       if (!match || match.status !== "FINISHED") return;
-
-        console.log('valid calc, continue: ', bet.id)
 
       bets_placed++;
 

@@ -96,6 +96,9 @@ function Table({ entry }) {
 
 // ─── Scorers Table ────────────────────────────────────────────────────────────
 function ScorersTable({ scorers, title, statKey }) {
+
+  console.log(scorers)
+
   return (
     <div className="bg-card rounded-2xl border border-border overflow-hidden">
       <div className="px-4 py-2.5 bg-secondary">
@@ -112,12 +115,12 @@ function ScorersTable({ scorers, title, statKey }) {
               <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold ${idx === 0 ? "bg-primary text-primary-foreground" : idx < 3 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                 {idx + 1}
               </span>
-              <span className="text-base">{player.teamFlag}</span>
+              <img src={player.team_crest} alt="" className="w-5 h-5 object-contain" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold truncate">{player.name}</p>
-                <p className="text-[10px] text-muted-foreground font-medium">{player.teamName}</p>
+                <p className="text-sm font-semibold truncate">{player.player_name}</p>
+                <p className="text-[10px] text-muted-foreground font-medium">{player.team_name}</p>
               </div>
-              <span className="text-lg font-bold text-primary">{player[statKey]}</span>
+              <span className="text-lg font-bold text-primary">{player.player_goals}</span>
             </div>
           ))
         )}
@@ -128,6 +131,7 @@ function ScorersTable({ scorers, title, statKey }) {
 
 import standingsData from "../lib/standings.json";
 import { getStandings } from "../services/standingService";
+import { getScorers } from "../services/scorersService";
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Standings() {
@@ -147,18 +151,21 @@ export default function Standings() {
         const data = await getStandings();
         const dataSort = [...data].sort((a, b) => a.sortBy - b.sortBy);
         setStandings(dataSort);
+
+        const scorers = await getScorers()
+        setScorers(scorers)
+
+        console.log(scorers)
       };
       fetchData();
       setLoading(false);
     }, []);
 
-  // const groupStandings = standings.filter((s) => s.type === "TOTAL" && s.stage === "GROUP_STAGE");
-
-  const tabs = [
-    { key: "groups", label: "Tabela" },
-    { key: "scorers", label: "Strzelcy" },
-    { key: "assists", label: "Asysty" },
-  ];
+    const tabs = [
+      { key: "groups", label: "Tabela" },
+      { key: "scorers", label: "Strzelcy" },
+      // { key: "assists", label: "Asysty" },
+    ];
 
   if (!session) return null;
 
@@ -201,7 +208,7 @@ export default function Standings() {
                 )
               )}
               {activeTab === "scorers" && (
-                <ScorersTable scorers={[...scorers].sort((a, b) => b.goals - a.goals)} title="Król strzelców" statKey="goals" />
+                <ScorersTable scorers={[...scorers].sort((a, b) => b.player_goals - a.player_goals)} title="Król strzelców" statKey="goals" />
               )}
               {activeTab === "assists" && (
                 <ScorersTable scorers={[...scorers].sort((a, b) => b.assists - a.assists)} title="Król asyst" statKey="assists" />

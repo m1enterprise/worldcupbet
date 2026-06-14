@@ -156,13 +156,10 @@ export default function Ranking() {
             const usersBetCalcDataSort = [...usersBetCalcData].sort(
               (a, b) => b.userPoints - a.userPoints
             );
-            console.log(1234, usersBetCalcDataSort)
-
             setAllBets(bets);
             setAllUsers(users);
             setMatches(matches);
             setAllUsersBetCalc(usersBetCalcDataSort);
-    
           } catch (err) {
             console.log(err.message);
           } finally {
@@ -212,8 +209,6 @@ export default function Ranking() {
     // Mapuj userId → username
     const userMap = {};
     allUsers.forEach((u) => { userMap[u.id] = u.username || u.email || u.id; });
-
-    console.log(157, userMap)
 
     return calcResults.map((entry) => ({
       ...entry,
@@ -280,9 +275,6 @@ export default function Ranking() {
                   <span className="text-center">Dokł.</span>
                 </div>
                 {allUsersBetCalc.map((player, idx) => {
-                  
-                  console.log("PLAYER", player)
-
                   const accuracy = player.bets_placed > 0
                     ? Math.round((player.trafione_wyniki / player.bets_placed) * 100)
                     : 0;

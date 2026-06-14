@@ -403,7 +403,6 @@ export default function Matches() {
         
         data.map(match=>{
             const match_t = utcToPolandIso(match.utcDate)
-            console.log(match.matchId, match_t)
             match.utcDate = match_t
         })
 
@@ -415,9 +414,6 @@ export default function Matches() {
 
         const betData = await getBetsByUserId(session.id)
         setFetchedBetData(betData || [])
-
-        console.log(302, betData)
-        console.log(303, betData?.find((bet) => bet?.matchId === '130'))
 
       } catch (err) {
         setError(err.message);
@@ -488,14 +484,7 @@ export default function Matches() {
 
   const handleSave = async () => {
     const updated = saveBetsForDay(dayBets);
-
-    // console.log('bets to be saved', updated);
-
     const arr = Object.values(updated);
-
-    // console.log('arr to be saved', arr)
-
-    console.log('session_id', session.id)
     for (const bet of arr) {
       const betRe = await saveBet(session.id, bet);
       if (!betRe) {

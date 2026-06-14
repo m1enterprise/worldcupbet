@@ -13,8 +13,6 @@ const PHASE_NAMES = {
 };
 
 function calculateMatchPoints(bet, result) {
-  console.log("BET=", bet)
-  console.log("SCO=", result)
 
   if (bet.homeScore === null || bet.awayScore === null || result.homeScore === null || result.awayScore === null)
     return { points: 0, reason: "Brak danych" };
@@ -46,17 +44,10 @@ function MatchCard({ match, fetchedBetData}) {
   const fetchedBet = fetchedBetData
   const pointsInfo = calcMatchPoints(fetchedBetData, match)
 
-  console.log("MATCH", match.id, match)
-  console.log("BET", match.id, fetchedBetData)
-
-  console.log("TEST", match.id, fetchedBet.homeScore)
-
   // let pointsInfo = null;
   // if (isFinished && fetchedBet && fetchedBet.homeScore !== "" && fetchedBet.homeScore !== undefined) {
   //   pointsInfo = calcMatchPoints(fetchedBet, { homeScore: match.score.fullTime.homeScore, awayScore: match.score.fullTime.awayScore, extraTimeWinner: match.score.fullTime?.extraTimeWinner, phase: match.phase });
   // }
-  console.log("CALC:",match.id, pointsInfo)
-
   // const match_t = `${Number(match.utcDate.slice(-9, -7))+2}${String(match.utcDate.slice(-7, -4))}`
   // const match_t = `${String((Number(match.utcDate.slice(-9, -7)) + 2) % 24).padStart(2, '0')}${match.utcDate.slice(-7, -4)}`;
   const match_t = match.utcDate
@@ -252,6 +243,7 @@ import teamsData from "../lib/teamsData.json"
 import { calcMatchPoints } from "../services/calcPointsService";
 import { useIsMobile } from "../hooks/use-mobile";
 import { getUsers } from "../services/userService";
+import { getScorers } from "../services/scorersService";
 
 export default function MyBets() {
   const navigate = useNavigate();
@@ -317,8 +309,6 @@ export default function MyBets() {
         const isStarted = now > ctf;
 
         currentMatchSort.isStarted = isStarted
-        
-        console.log('current match info: ', currentMatchSort)
         setCurrentMatch(currentMatchSort)
 
         // ALL USERS BET FOR THE CURRENT MATCH
@@ -330,7 +320,6 @@ export default function MyBets() {
           const getUser = all_users.filter(user=>String(user.id) === String(bet.userId))?.[0]
           bet.username = getUser?.username
         })
-        console.log("ALL_BETS_MOD", all_bets_sort)
         setAllUsersBet(all_bets_sort)
 
       // BONUS BET BY USER ID
@@ -537,8 +526,6 @@ export default function MyBets() {
               const betMatchFullInfo = matches.filter(match=> String(match.id) === String(bet.matchId))?.[0]
 
               // console.log(352, betMatchFullInfo)
-              console.log("BET_BEFORE", bet)
-              console.log("MATCH_FULL_BEFORE", betMatchFullInfo)
 
               return (
                   <MatchCard

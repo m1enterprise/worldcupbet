@@ -9,7 +9,6 @@ export async function getBets() {
     console.error(error);
     return null;
   } else {
-    console.log('all_bets: ', data)
     return data;
   }
 }
@@ -24,7 +23,6 @@ export async function getBetsByUserId(userId) {
     console.error(error);
     return null;
   } else {
-    console.log('bets: ', data)
     return data;
 }
 }
@@ -37,8 +35,6 @@ export async function pushBonusBet(userId, bonusBet) {
   if (now > ctf) {
     return null
   }
-
-  console.log('before match')
 
     const { data, error } = await supabase
       .from('bonusbets')
@@ -61,8 +57,6 @@ export async function pushBonusBet(userId, bonusBet) {
         console.log(error)
         return null
       } else {
-            console.log(200)
-            console.log(data)
         return(data);
       }
   } else {
@@ -77,8 +71,6 @@ export async function pushBonusBet(userId, bonusBet) {
         console.log(error)
         return null
       } else {
-            console.log(300)
-
         return(data);
       }
   }
@@ -95,7 +87,6 @@ export async function getBonusBetByUserId(userId) {
     console.error(error);
     return null;
   } else {
-    console.log('bets: ', data)
     return data;
 }
 }
