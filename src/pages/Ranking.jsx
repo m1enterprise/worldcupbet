@@ -102,7 +102,7 @@ export default function Ranking() {
             const matches = await getMatches()
 
             const usersBetCalcData = []
-            
+
             // Calc punkty dla each usera
             users.map(user=>{
               // users bets filter
@@ -120,12 +120,8 @@ export default function Ranking() {
 
               userBets.map(bet=>{
                 const matchBetData = matches?.filter((item)=>String(item?.id) === String(bet?.matchId))?.[0]
-                if (matchBetData.status !== "FINISHED") return console.log("122 TEST")
+                if (matchBetData.status !== "FINISHED") return
                 const userBetInfo = calcMatchPoints(bet, matchBetData)
-
-                console.log(matchBetData)
-                console.log(userBetInfo)
-
                 userObject.userBets.push(userBetInfo)
               })
 
