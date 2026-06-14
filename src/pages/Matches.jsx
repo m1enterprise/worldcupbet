@@ -142,13 +142,11 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
 
   const now = new Date();
   const ctf = new Date(match.utcDate);
-  console.log(now)
-  console.log(ctf)
+
   // if (now > ctf) {
   //   return null
   // }
   const canBet = now < ctf
-  console.log(canBet)
 
   const bH = bet?.homeScore ?? "";
   const bA = bet?.awayScore ?? "";
@@ -170,10 +168,7 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
   // }
 
   // bet, match
-  const pointsInfo = calcMatchPoints(bet, fetchedBetData)
-
-  console.log("MATCH", match.id, match)
-  console.log("BET", match.id, bet)
+  const pointsInfo = calcMatchPoints(fetchedBet, match)
 
   // const match_t = `${Number(match.utcDate.slice(-9, -7))+2}${String(match.utcDate.slice(-7, -4))}`
   // const match_t = `${String((Number(match.utcDate.slice(-9, -7)) + 2) % 24).padStart(2, '0')}${match.utcDate.slice(-7, -4)}`;
