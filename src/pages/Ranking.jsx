@@ -13,7 +13,7 @@ function BottomNav() {
   const items = [
     { path: "/", icon: LoaderPinwheel, label: "Mecze" },
     { path: "/standings", icon: Table2, label: "Tabele" },
-    { path: "/my-bets", icon: Star, label: "Bet" },
+    { path: "/my-bets", icon: Star, label: "Bety" },
     // { path: "/points", icon: BarChart3, label: "Punkty" },
     { path: "/ranking", icon: Users, label: "Ranking" },
   ];
@@ -72,6 +72,7 @@ export default function Ranking() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [allUsersBetCalc, setAllUsersBetCalc] = useState([]);
+  const [userRank, setUserRank] = useState(null)
 
   useEffect(() => {
     // try{
@@ -149,6 +150,14 @@ export default function Ranking() {
             const usersBetCalcDataSort = [...usersBetCalcData].sort(
               (a, b) => b.userPoints - a.userPoints
             );
+
+            usersBetCalcDataSort.map((user, index)=>{
+              if (user.userId === session.id){
+                setUserRank(index+1)
+                return
+              }
+            })
+
             setAllBets(bets);
             setAllUsers(users);
             setMatches(matches);
@@ -210,9 +219,6 @@ export default function Ranking() {
     }));
   }, [allBets, normalizedMatches, allUsers, session]);
 
-  // Znajdź pozycję zalogowanego usera
-  const myRank = ranking.findIndex((p) => p.isMe) + 1;
-
   if (!session) return null;
 
   return (
@@ -225,9 +231,9 @@ export default function Ranking() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(212,175,55,0.08),transparent_70%)]" />
             <div className="relative flex items-center justify-between">
               <div className="text-left">
-                <p className="text-secondary-foreground/60 text-xs font-semibold uppercase tracking-wider">Twoja pozycja</p>
-                <p className="text-4xl font-display font-black text-secondary-foreground">
-                  {myRank > 0 ? `#${myRank}` : "—"}
+                <p className="text-secondary-foreground/60 text-xs font-semibold uppercase tracking-wider">Miejsce</p>
+                <p className="text-4xl font-display font-black text-secondary-foreground text-center">
+                  {userRank ? userRank : ''}
                 </p>
               </div>
               <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center">
@@ -235,7 +241,7 @@ export default function Ranking() {
               </div>
               <div className="text-right">
                 <p className="text-secondary-foreground/60 text-xs font-semibold uppercase tracking-wider">Graczy</p>
-                <p className="text-4xl font-display font-black text-secondary-foreground">{ranking.length}</p>
+                <p className="text-4xl font-display font-black text-secondary-foreground text-center">{ranking.length}</p>
               </div>
             </div>
           </div>

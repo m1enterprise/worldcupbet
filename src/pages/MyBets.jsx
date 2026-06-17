@@ -37,6 +37,7 @@ function calculateMatchPoints(bet, result) {
 }
 
 function MatchCard({ match, fetchedBetData}) {
+  const isMobile = useIsMobile();
   const isKnockout = match?.stage !== "GROUP_STAGE";
   const isFinished = match?.status === "FINISHED";
 
@@ -76,7 +77,7 @@ function MatchCard({ match, fetchedBetData}) {
 
       <div className="px-4 py-3 flex items-center gap-3">
          {
-            !useIsMobile() && (
+            !isMobile && (
               <div className="flex-1 flex items-center gap-2.5 justify-start min-w-0">
                 <div className="w-12 h-8">
                   <img   className="w-full h-full object-cover rounded-[4px]"
@@ -90,7 +91,7 @@ function MatchCard({ match, fetchedBetData}) {
             )
           }
           {
-            useIsMobile() && (
+            isMobile && (
               <div className="flex-1 flex items-center gap-2.5 justify-start min-w-0"> 
                 <div className="w-12 h-8">
                   <img   className="w-full h-full object-cover rounded-[4px]"
@@ -127,7 +128,7 @@ function MatchCard({ match, fetchedBetData}) {
           </div>
 
           {
-            !useIsMobile() && (
+            !isMobile && (
               <div className="flex-1 flex items-center gap-2.5 justify-end min-w-0">
                 <div className="min-w-0 text-right">
                   <p className="text-sm font-bold">{match?.awayTeam?.name}</p>
@@ -141,7 +142,7 @@ function MatchCard({ match, fetchedBetData}) {
             )
           }
           {
-            useIsMobile() && (
+            isMobile && (
               <div className="flex-1 flex items-center gap-2.5 justify-end min-w-0">                   
                 <div className="min-w-0 text-left">
                   <p className="text-sm font-bold">{match?.awayTeam?.tla}</p>
@@ -236,7 +237,7 @@ function Header({ username }) {
 }
 
 import { getMatches } from "../services/matchService";
-import { getBets, getBetsByUserId, getBonusBetByUserId, pushBonusBet } from "../services/betService";
+import { getBets, getBetsByUserId, getBonusBetByUserId, getBonusBets, pushBonusBet } from "../services/betService";
 
 import playersData from "../lib/playersData.json"
 import teamsData from "../lib/teamsData.json"
@@ -246,19 +247,25 @@ import { getUsers } from "../services/userService";
 import { getScorers } from "../services/scorersService";
 
 export default function MyBets() {
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const session = getSession();
-
-  useEffect(() => { if (!session) navigate("/login"); }, []);
 
   const [matches, setMatches] = useState([]);
   const [userBets, setUserBets] = useState([]);
   const [bonusBets, setBonusBets] = useState({});
+  const [bonusBetsAll, setBonusBetsAll] = useState([])
   const bets = useMemo(() => loadBets(), []);
   const [allUsersBet, setAllUsersBet] = useState([])
   const [fetchedBonusData, setFetchedBonusData] = useState([])
   const [matchesFullBet, setMatchesFullBet] = useState([])
   const [currentMatch, setCurrentMatch] = useState([])
+  const [activeTab, setActiveTab] = useState("bets")
+
+  const tabs = [
+    {key: "bets", label: "Bety"},
+    {key: "bonus", label: "Bonus"}
+  ]
 
   useEffect(() => {
     const fetchData = async () => {
@@ -329,6 +336,16 @@ export default function MyBets() {
       const bonus_data = bonus_arr[0]
       if (!bonus_data) return console.log('No user_bet data found');
 
+      const bonus_bets_data = await getBonusBets()
+      bonus_bets_data.map(bonus=>{
+        const getUser = all_users.filter(user=>String(user.id) === String(bonus.bonusUserId))?.[0]
+        bonus.bonusUsername = getUser?.username
+      })
+
+      setBonusBetsAll(bonus_bets_data)
+
+      console.log(1234, bonus_bets_data)  
+
       // CALC USER POINTS
       // const userBetPoints = calcMatchPoints(bet_data[0], data[0])
       // console.log("CALC_BET_SCR: ", userBetPoints)
@@ -346,11 +363,26 @@ export default function MyBets() {
     fetchData();
   }, []);
 
+    useEffect(() => { if (!session) navigate("/login"); }, []);
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header username={session?.username} />
       <main className="flex-1 pb-24">
         <div className="max-w-2xl mx-auto px-4 py-4 space-y-6">
+
+          <div className="flex bg-muted rounded-xl p-1 gap-1 mb-4">
+            {tabs.map((t) => (
+              <button key={t.key} onClick={() => setActiveTab(t.key)}
+                className={`flex-1 h-9 rounded-lg text-sm font-semibold transition-all ${activeTab === t.key ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          {activeTab === "bets" && (
+
+          <>
     
           {/* Bet history */}
           <div>
@@ -377,7 +409,7 @@ export default function MyBets() {
 
       <div className="px-4 py-3 flex items-center gap-3">
          {
-            !useIsMobile() && (
+            !isMobile && (
               <div className="flex-1 flex items-center gap-2.5 justify-start min-w-0">
                 <div className="w-12 h-8">
                   <img   className="w-full h-full object-cover rounded-[4px]"
@@ -391,7 +423,7 @@ export default function MyBets() {
             )
           }
           {
-            useIsMobile() && (
+            isMobile && (
               <div className="flex-1 flex items-center gap-2.5 justify-start min-w-0"> 
                 <div className="w-12 h-8">
                   <img   className="w-full h-full object-cover rounded-[4px]"
@@ -439,7 +471,7 @@ export default function MyBets() {
           )}
 
           {
-            !useIsMobile() && (
+            !isMobile && (
               <div className="flex-1 flex items-center gap-2.5 justify-end min-w-0">
                 <div className="min-w-0 text-right">
                   <p className="text-sm font-bold">{currentMatch?.awayTeam?.name}</p>
@@ -453,7 +485,7 @@ export default function MyBets() {
             )
           }
           {
-            useIsMobile() && (
+            isMobile && (
               <div className="flex-1 flex items-center gap-2.5 justify-end min-w-0">                   
                 <div className="min-w-0 text-left">
                   <p className="text-sm font-bold">{currentMatch?.awayTeam?.tla}</p>
@@ -492,24 +524,6 @@ export default function MyBets() {
               Twoje bety ({userBets?.length})
             </h2> 
 
-            <div className="bg-card rounded-2xl border border-border p-3 text-center mb-3">
-                    <p className="text-muted-foreground text-sm">
-                      BONUS BET
-                    </p>
-                    <label className="tracking-wide mb-1.5 block text-start text-[11px] font-medium">
-                          <span className="text-muted-foreground uppercase">🏆 Mistrz Świata: </span>
-                          <span className="text-xs font-semibold flex-1 truncate">{fetchedBonusData?.bonusChampion}</span>
-                    </label>
-                    <label className="tracking-wide mb-1.5 block text-start text-[11px] font-medium">
-                          <span className="text-muted-foreground uppercase">👟 Król Strzelców: </span>
-                          <span className="text-xs font-semibold flex-1 truncate">{fetchedBonusData?.bonusScorer}</span>
-                    </label>
-                    <label className="tracking-wide mb-1.5 block text-start text-[11px] font-medium">
-                          <span className="text-muted-foreground uppercase">👟 Król Asyst: </span> 
-                          <span className="text-xs font-semibold flex-1 truncate">{fetchedBonusData?.bonusAssister}</span>
-                    </label>
-              </div>
-
     {userBets.length === 0 && (
           <div className="bg-card rounded-2xl border border-border p-8 text-center">
             <p className="text-muted-foreground text-sm">
@@ -546,104 +560,34 @@ export default function MyBets() {
             })}
           </div>  
         )}
-
-        { 
-          //     const isFinished = match.status === "FINISHED";
-          //     let pointsInfo = null;
-          //     // if (isFinished) {
-          //     //   pointsInfo = calculateMatchPoints(match, {
-          //     //     homeScore: matchBet?.score?.fullTime?.home,
-          //     //     awayScore: matchBet?.score?.fullTime?.away,
-          //     //     extraTimeWinner: matchBet?.score?.extraTimeWinner,
-          //     //     phase: matchBet?.phase,
-          //     //   });
-          //     // }
-
-          //     console.log("matches full bet", matchesFullBet)
-
-          //     // filter matchesFullBet for this matchId
-          //     const matchBetData = matchesFullBet?.filter((item)=>String(item?.id) === String(match?.matchId))?.[0]
-          //     const userBetInfo = calcMatchPoints(match, matchBetData)
-          //     console.log("CALC_BET_SCR: ", userBetInfo)
-          //     return (
-          //       <div
-          //         key={match.id}
-          //         className="bg-card rounded-xl border border-border p-3"
-          //       >
-          //         <div className="flex items-center justify-between mb-1.5">
-          //           <span className="text-[10px] text-muted-foreground font-medium">
-          //             {format(parseISO(match.matchUtcDate), "d MMM", { locale: pl })} •{" "}
-          //             {match.group
-          //               ? `Gr. ${match.group.slice(-1)}`
-          //               : PHASE_NAMES[match.phase]}
-          //           </span>
-          //           {userBetInfo && matchBetData?.status === "FINISHED" && (
-          //             <>
-          //             <div className="text-[12px] font-bold text-center">
-          //               {matchBetData?.score?.fullTime.home}:{matchBetData?.score?.fullTime.away}
-          //             </div>
-          //             <div
-          //               className={`text-[12px] font-bold ${
-          //                 userBetInfo.points > 0
-          //                   ? "text-green-700"
-          //                   : "text-red-500"
-          //               }`}
-          //             >
-          //               {userBetInfo.points} pkt
-          //             </div>
-          //             </>
-          //           )}
-          //           {!(matchBetData?.status === "FINISHED") && (
-          //             <div variant="secondary" className="text-[10px]">
-          //               Oczekuje
-          //             </div>
-          //           )}
-          //         </div>
-          //         <div className="flex items-center gap-2">
-
-          //           <div className="w-12 h-8">
-          //               <img className="w-full h-full object-cover rounded-[4px]"
-          //                 src={match.homeTeam.crest}/>
-          //           </div>
-          //           <span className="text-xs font-semibold flex-1 truncate">
-          //             {match.homeTeam.name}
-          //           </span>
-          //           <span className="text-sm font-bold bg-muted rounded-lg px-2.5 py-1">
-          //             {match.homeScore} : {match.awayScore}
-          //           </span>
-          //           <span className="text-xs font-semibold flex-1 truncate text-right">
-          //             {match.awayTeam.name}
-          //           </span>
-          //           <div className="w-12 h-8">
-          //               <img className="w-full h-full object-cover rounded-[4px]"
-          //                 src={match.awayTeam.crest}/>
-          //           </div>
-                    
-                    
-          //         </div>
-
-          //         {match.extraTimeWinner && (
-          //           <p className="text-[10px] text-muted-foreground mt-1.5 text-center">
-          //             Wygra po dogrywce:{" "}
-          //             <span className="font-bold">
-          //               {match.extraTimeWinner === "home"
-          //                 ? match.homeTeam.name
-          //                 : match.awayTeam.name}
-          //             </span>
-          //           </p>
-          //         )}
-
-          //         {/* {isFinished && pointsInfo && (
-          //           <p className="text-[10px] text-muted-foreground mt-1 text-center">
-          //             Wynik: {bet.score}:{match.awayScore} • {pointsInfo.reason}
-          //           </p>
-          //         )} */}
-          //       </div>
-          //     );
-          //   })}
-          // </div>
-        }
           </div>
+
+          </>
+          )}
+          {activeTab === "bonus" && (
+            <>
+            {bonusBetsAll?.map(bonus=>(
+              <div key={bonus.bonusUserId} className="bg-card rounded-2xl border border-border p-3 text-center mb-3">
+                    <p className="text-muted-foreground text-sm">
+                      BONUS BET {bonus?.bonusUsername}
+                    </p>
+                    <label className="tracking-wide mb-1.5 block text-start text-[11px] font-medium">
+                          <span className="text-muted-foreground uppercase">🏆 Mistrz Świata: </span>
+                          <span className="text-xs font-semibold flex-1 truncate">{bonus?.bonusChampion}</span>
+                    </label>
+                    <label className="tracking-wide mb-1.5 block text-start text-[11px] font-medium">
+                          <span className="text-muted-foreground uppercase">👟 Król Strzelców: </span>
+                          <span className="text-xs font-semibold flex-1 truncate">{bonus?.bonusScorer}</span>
+                    </label>
+                    <label className="tracking-wide mb-1.5 block text-start text-[11px] font-medium">
+                          <span className="text-muted-foreground uppercase">👟 Król Asyst: </span> 
+                          <span className="text-xs font-semibold flex-1 truncate">{bonus?.bonusAssister}</span>
+                    </label>
+              </div>
+            ))}
+              </>
+            
+          )}
         </div>
       </main>
       <BottomNav />

@@ -90,3 +90,16 @@ export async function getBonusBetByUserId(userId) {
     return data;
 }
 }
+
+export async function getBonusBets(userId) {
+  const { data, error } = await supabase
+        .from('bonusbets')
+        .select('*')
+  
+  if (error) {
+    console.error(error);
+    return null;
+  } else {
+    return data;
+}
+}
