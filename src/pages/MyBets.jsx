@@ -585,6 +585,7 @@ export default function MyBets() {
                     </label>
               </div>
             ))}
+            
               </>
             
           )}
