@@ -281,7 +281,14 @@ function MatchCardMy({
                   {" : "}
                   {fetchedBetData?.awayScore}
                 </span>{" "}
-                {fetchedBetData?.awayTeam?.tla}
+                {fetchedBetData?.awayTeam?.tla}{" "}
+
+                {fetchedBetData?.extraTimeWinner && 
+                <span>
+                  <span className="text-muted-foreground">ET </span>
+                  <span className="font-bold">{fetchedBetData?.[`${fetchedBetData?.extraTimeWinner}Team`]?.name}</span>
+                </span>
+              }
               </span>
 
              {isFinished ? (

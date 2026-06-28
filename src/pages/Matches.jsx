@@ -344,8 +344,8 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
               <span className="font-bold">{fetchedBet?.homeScore} : {fetchedBet?.awayScore} </span>
               {fetchedBet?.extraTimeWinner && 
               <span>
-                <span className="text-muted-foreground">   ET </span>
-                <span className="font-bold">{fetchedBet?.[fetchedBet?.extraTimeWinner]?.name}</span>
+                <span className="text-muted-foreground">ET </span>
+                <span className="font-bold">{fetchedBet?.[`${fetchedBet?.extraTimeWinner}Team`]?.name}</span>
               </span>
               }
             </span>
