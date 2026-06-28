@@ -24,8 +24,8 @@
 
 // Etapy pucharowe wg football-data.org
 const KNOCKOUT_STAGES = new Set([
-  "ROUND_OF_32",
-  "ROUND_OF_16",
+  "LAST_32",
+  "LAST_16",
   "QUARTER_FINALS",
   "SEMI_FINALS",
   "THIRD_PLACE",
@@ -59,7 +59,36 @@ function getOutcome(homeScore, awayScore) {
  * @returns {{ points: number, isCorrect: boolean, isExact: boolean }}
  */
 export function calcMatchPoints(bet, match) {
+
+
+  // // TEST INFO
+  // match = {
+  //   id: 141,
+  //   stage: "LAST_32",
+  //   score: {
+  //     "winner": "HOME_TEAM",
+  //     "duration": "EXTRA_TIME",
+  //     "fullTime": {
+  //       "home": 2,
+  //       "away": 2
+  //     },
+  //     "halfTime": {
+  //       "home": 0,
+  //       "away": 0
+  //     }
+  //   }
+  // }
+
+  // bet = {
+  //   matchId: "141",
+  //   homeScore: 2,
+  //   awayScore: 2,
+  //   extraTimeWinner: "home"
+  // }
+
   const { score, stage } = match;
+
+  // console.log("check 0")
 
   // Brak wyniku meczu lub betu → 0 pkt
   if (
@@ -92,6 +121,8 @@ export function calcMatchPoints(bet, match) {
   // Zwycięzca po dogrywce z betu usera
   const betExtWinner = bet.extraTimeWinner || null; // "home" | "away" | null
 
+  // console.log("check 1")
+
   // ── FAZA GRUPOWA ──────────────────────────────────────────────
   if (!isKnockout(stage)) {
     if (exactScore) return { points: 5, isCorrect: true, isExact: true };
@@ -99,19 +130,30 @@ export function calcMatchPoints(bet, match) {
     return { points: 0, isCorrect: false, isExact: false };
   }
 
+  // console.log("check 2")
+
   // ── FAZA PUCHAROWA ────────────────────────────────────────────
 
   // Czy mecz zakończył się w dogrywce / karnych?
+
   const wentToET =
     score.duration === "EXTRA_TIME" || score.duration === "PENALTY_SHOOTOUT";
 
+  console.log("betExtWinner", betExtWinner)
+  console.log("realExtWinner", realExtWinner)
+
   // 7 pkt: dokładny remis 90 min + trafiony zwycięzca po dogrywce
   if (exactScore && realOutcome === "draw" && wentToET && betExtWinner && betExtWinner === realExtWinner) {
-    return { points: 7, isCorrect: true, isExact: true };
+
+
+    console.log("POINTS 7")
+    return { points: 7, isCorrect: true, isExact: true, isSuperExact: true };
   }
 
   // 5 pkt: dokładny wynik do 90 min (bez dogrywki)
   if (exactScore && !wentToET) {
+
+    console.log("POINTS 5")
     return { points: 5, isCorrect: true, isExact: true };
   }
 
@@ -161,6 +203,7 @@ export function calcPointsForAllUsers(bets, matches, bonusData = [], tournamentR
     // console.log(3, bonusData)
     // console.log(4, tournamentResults)
   // Indeks meczów wg ID (string) dla O(1) lookup
+
   const matchIndex = {};
   matches.forEach((m) => {
     matchIndex[String(m.id)] = m;

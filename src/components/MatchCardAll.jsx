@@ -41,8 +41,6 @@ function MatchCardAll({
 
   const matchTime = `${String(new Date(match?.utcDate))?.slice(16, 21)}`
 
-  console.log(match.status)
-
   return (
     <div
       className={`relative bg-card rounded-2xl border border-border overflow-hidden transition-all ${

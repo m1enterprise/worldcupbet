@@ -154,17 +154,21 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
 
   const bH = bet?.homeScore ?? "";
   const bA = bet?.awayScore ?? "";
-  const betExt = bet?.extraTimeWinner ?? "";
+  const bET = bet?.extraTimeWinner ?? "";
   const isBetDraw = bH !== "" && bA !== "" && parseInt(bH) === parseInt(bA);
 
   const fetchedBet = fetchedBetData?.find((bet) => String(bet?.matchId) === String(match?.id))
 
+  // const [etWinner, setEtWinner] = useState(null)
   const handleScore = (side, value) => {
     const val = value === "" ? "" : Math.max(0, parseInt(value) || 0);
-    onChange(match, { homeScore: side === "home" ? val : bH, awayScore: side === "away" ? val : bA, extraTimeWinner: bet?.extraTimeWinner || "" });
+    onChange(match, { homeScore: side === "home" ? val : bH, awayScore: side === "away" ? val : bA, extraTimeWinner: side === "etWinner" ? value : bET });
   };
 
-  const handleExt = (value) => onChange(match.id, { ...bet, homeScore: bH, awayScore: bA, extraTimeWinner: value });
+  // const handleExt = (value) => {
+  //   onChange(match.id, { ...bet, homeScore: bH, awayScore: bA, extraTimeWinner: value })
+  //   console.log("handle", value)
+  // };
 
   // let pointsInfo = null;
   // if (isFinished && bet && bet.homeScore !== "" && bet.homeScore !== undefined) {
@@ -177,6 +181,8 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
   // const match_t = `${Number(match.utcDate.slice(-9, -7))+2}${String(match.utcDate.slice(-7, -4))}`
   // const match_t = `${String((Number(match.utcDate.slice(-9, -7)) + 2) % 24).padStart(2, '0')}${match.utcDate.slice(-7, -4)}`;
   const match_t = match.utcDate
+
+  // console.log(match)
 
   return (
     <div className={`relative bg-card rounded-2xl border border-border overflow-hidden transition-all ${isFinished ? "opacity-70" : "shadow-sm hover:shadow-md"}`}>
@@ -300,11 +306,14 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
         <div className="px-4 pb-3">
           <div className="bg-muted/60 rounded-xl p-3">
             <p className="text-[11px] text-muted-foreground font-medium mb-2">Remis — kto wygra po dogrywce/karnych?</p>
-            <select value={betExt} onChange={(e) => handleExt(e.target.value)}
+            <select value={bET} onChange={(e) => {
+              handleScore("etWinner", e.target.value)
+              // setEtWinner(e.target.value)
+            }}
               className="w-full h-9 rounded-xl border border-border bg-background text-sm px-3 focus:outline-none focus:border-primary">
               <option value="">Wybierz zwycięzcę...</option>
-              <option value="home">{match.homeFlag} {match.homeName}</option>
-              <option value="away">{match.awayFlag} {match.awayName}</option>
+              <option value="home">{match?.homeTeam?.name}</option>
+              <option value="away">{match?.awayTeam?.name}</option>
             </select>
           </div>
         </div>
@@ -332,9 +341,15 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
             }`}>
             <span>
               <span className="text-muted-foreground">BET </span>
-              <span className="font-bold">{fetchedBet?.homeScore} : {fetchedBet?.awayScore}</span>
+              <span className="font-bold">{fetchedBet?.homeScore} : {fetchedBet?.awayScore} </span>
+              {fetchedBet?.extraTimeWinner && 
+              <span>
+                <span className="text-muted-foreground">   ET </span>
+                <span className="font-bold">{fetchedBet?.[fetchedBet?.extraTimeWinner]?.name}</span>
+              </span>
+              }
             </span>
-            
+
             {pointsInfo && isFinished ?
               <span>
                 <span className="font-bold">{pointsInfo?.points}</span> 
@@ -419,6 +434,8 @@ export default function Matches() {
         const betData = await getBetsByUserId(session.id)
         setFetchedBetData(betData || [])
 
+
+        console.log()
       } catch (err) {
         setError(err.message);
       } finally {
@@ -487,6 +504,9 @@ export default function Matches() {
   }, []);
 
   const handleSave = async () => {
+
+    console.log(0, "saving bets: ", dayBets)
+
     const updated = saveBetsForDay(dayBets);
     const arr = Object.values(updated);
     for (const bet of arr) {
