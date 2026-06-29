@@ -112,9 +112,9 @@ export function calcMatchPoints(bet, match) {
 
   // Zwycięzca po dogrywce / karnych z football-data: "HOME_TEAM" | "AWAY_TEAM"
   const realExtWinner =
-    score.winner === "HOME_TEAM" && realOutcome === "draw"
+    score.winner === "HOME_TEAM"
       ? "home"
-      : score.winner === "AWAY_TEAM" && realOutcome === "draw"
+      : score.winner === "AWAY_TEAM"
       ? "away"
       : null;
 
@@ -139,21 +139,13 @@ export function calcMatchPoints(bet, match) {
   const wentToET =
     score.duration === "EXTRA_TIME" || score.duration === "PENALTY_SHOOTOUT";
 
-  console.log("betExtWinner", betExtWinner)
-  console.log("realExtWinner", realExtWinner)
-
   // 7 pkt: dokładny remis 90 min + trafiony zwycięzca po dogrywce
   if (exactScore && realOutcome === "draw" && wentToET && betExtWinner && betExtWinner === realExtWinner) {
-
-
-    console.log("POINTS 7")
     return { points: 7, isCorrect: true, isExact: true, isSuperExact: true };
   }
 
   // 5 pkt: dokładny wynik do 90 min (bez dogrywki)
   if (exactScore && !wentToET) {
-
-    console.log("POINTS 5")
     return { points: 5, isCorrect: true, isExact: true };
   }
 
@@ -173,7 +165,7 @@ export function calcMatchPoints(bet, match) {
   }
 
   // 2 pkt: zły rezultat 90 min, ale trafiony zwycięzca po dogrywce
-  if (!correctOutcome && wentToET && betExtWinner && betExtWinner === realExtWinner) {
+  if (!correctOutcome && betExtWinner && betExtWinner === realExtWinner) {
     return { points: 2, isCorrect: false, isExact: false };
   }
 

@@ -185,14 +185,16 @@ function MatchCardAll({
                 {USER_NAMES[userBet?.userId]}
               </span>
 
-              <span className="text-muted-foreground text-center">
-                {userBet?.homeTeam?.tla}{" "}
+              <span className={`text-muted-foreground text-center`}>
+                <span className={`${userBet?.extraTimeWinner === "home" ? "text-green-900 font-bold underline" : ""}`}>{userBet?.homeTeam?.tla}{" "}</span>
+                
                 <span className="font-bold text-secondary">
                   {userBet?.homeScore}
                   {" : "}
                   {userBet?.awayScore}
                 </span>{" "}
-                {userBet?.awayTeam?.tla}
+
+                <span className={`${userBet?.extraTimeWinner === "away" ? "text-green-900 font-bold underline" : ""}`}>{userBet?.awayTeam?.tla}{" "}</span>
               </span>
 
               <span className="text-muted-foreground text-right">

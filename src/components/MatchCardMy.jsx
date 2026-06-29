@@ -270,25 +270,18 @@ function MatchCardMy({
                   : "to-red-100"
               }`}
             >
-              <span className="text-muted-foreground texxt-left">
+              <span className="text-muted-foreground text-left">
                 TWÓJ BET
               </span>
 
               <span className="text-muted-foreground text-center">
-                {fetchedBetData?.homeTeam?.tla}{" "}
+                <span className={`${fetchedBetData?.extraTimeWinner === "home" ? "text-green-900 font-bold underline" : ""}`}>{fetchedBetData?.homeTeam?.tla}{" "}</span>
                 <span className="font-bold text-secondary">
                   {fetchedBetData?.homeScore}
                   {" : "}
                   {fetchedBetData?.awayScore}
                 </span>{" "}
-                {fetchedBetData?.awayTeam?.tla}{" "}
-
-                {fetchedBetData?.extraTimeWinner && 
-                <span>
-                  <span className="text-muted-foreground">ET </span>
-                  <span className="font-bold">{fetchedBetData?.[`${fetchedBetData?.extraTimeWinner}Team`]?.name}</span>
-                </span>
-              }
+                <span className={`${fetchedBetData?.extraTimeWinner === "away" ? "text-green-900 font-bold underline" : ""}`}>{fetchedBetData?.awayTeam?.tla}{" "}</span>
               </span>
 
              {isFinished ? (

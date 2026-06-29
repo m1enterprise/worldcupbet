@@ -332,31 +332,34 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
 
       {(
         <div className="px-4 pb-3">
-          <div className={`bg-muted/50 rounded-lg px-3 py-2 text-xs flex items-center justify-between bg-gradient-to-r from-white/10 via-white/10 ${
-            !isFinished
-              ? 'to-gray-100'
-              : pointsInfo?.points > 0
-                ? 'to-green-100'
-                : 'to-red-100'
-            }`}>
-            <span>
-              <span className="text-muted-foreground">BET </span>
-              <span className="font-bold">{fetchedBet?.homeScore} : {fetchedBet?.awayScore} </span>
-              {fetchedBet?.extraTimeWinner && 
-              <span>
-                <span className="text-muted-foreground">ET </span>
-                <span className="font-bold">{fetchedBet?.[`${fetchedBet?.extraTimeWinner}Team`]?.name}</span>
+          <div className={`grid grid-cols-3 w-full mb-2 bg-muted/50 rounded-lg px-3 py-2 text-xs flex items-center justify-between bg-gradient-to-r from-white/10 via-white/10 ${
+                !isFinished
+                  ? "to-gray-100"
+                  : pointsInfo?.points >= 5
+                  ? "to-yellow-100"
+                  : pointsInfo?.points > 0
+                  ? "to-green-100"
+                  : "to-red-100"
+              }`}>
+              <span className="">BET</span>
+
+            <span className="text-muted-foreground text-center">
+                <span className={`${fetchedBet?.extraTimeWinner === "home" ? "text-green-900 font-bold underline" : ""}`}>{fetchedBet?.homeTeam?.tla}{" "}</span>
+                <span className="font-bold text-secondary">
+                  {fetchedBet?.homeScore}
+                  {" : "}
+                  {fetchedBet?.awayScore}
+                </span>{" "}
+                <span className={`${fetchedBet?.extraTimeWinner === "away" ? "text-green-900 font-bold underline" : ""}`}>{fetchedBet?.awayTeam?.tla}{" "}</span>
               </span>
-              }
-            </span>
 
             {pointsInfo && isFinished ?
-              <span>
+              <span className="text-right">
                 <span className="font-bold">{pointsInfo?.points}</span> 
                 <span className=""> PKT</span>
               </span>
               :
-              <div className="text-muted-foreground">OCZEKUJE</div>
+              <div className="text-right text-muted-foreground">OCZEKUJE</div>
             }
             
           </div>
