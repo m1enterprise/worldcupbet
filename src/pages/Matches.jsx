@@ -38,8 +38,8 @@ function calculateMatchPoints(bet, result) {
 // ─── PHASE NAMES ─────────────────────────────────────────────────────────────
 const PHASE_NAMES = {
   group: "Faza grupowa",
-  round_of_32: "1/16 finału",
-  round_of_16: "1/8 finału",
+  LAST_32: "1/16 finału",
+  LAST_16: "1/8 finału",
   quarter_final: "Ćwierćfinał",
   semi_final: "Półfinał",
   third_place: "Mecz o 3. miejsce",
@@ -183,18 +183,26 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
   const match_t = match.utcDate
 
   // console.log(match)
+  console.log(match.stage)
 
   return (
     <div className={`relative bg-card rounded-2xl border border-border overflow-hidden transition-all ${isFinished ? "opacity-70" : "shadow-sm hover:shadow-md"}`}>
-      <div className="flex items-center justify-between px-4 pt-3">
+      <div className="flex items-center justify-between px-4 pt-3 grid grid-cols-3">
         <div className="flex items-start gap-2 text-muted-foreground"> 
           {match.group && <span className="text-[10px] font-medium rounded-full">{match.group.slice(-1)}</span>}
-          {isKnockout && <span className="text-[10px] font-bold px-2 py-0.5 bg-primary/10 text-primary rounded-full">{PHASE_NAMES[match.phase]}</span>}
-          {match.status === "live" && <span className="text-[10px] font-bold px-2 py-0.5 bg-red-500 text-white rounded-full animate-pulse">NA ŻYWO</span>}
+          {isKnockout && <span className="text-[10px] font-bold px-2 py-0.5 bg-primary/10 text-primary rounded-full">{PHASE_NAMES[match.stage]}</span>}     
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] text-muted-foreground font-medium">
+         {match?.status !== "TIMED" && match?.status !== "FINISHED" ? (
+                    <div className="flex justify-center">
+                    <span className="text-[10px] text-center font-bold px-2 py-0.5 bg-red-500 text-white rounded-full animate-pulse">
+                        MECZ TRWA
+                      </span>
+                    </div>
+                  ):<div></div>}  
+
+        <div className="text-right">
+          <span className="text-[11px] text-muted-foreground font-medium text-right">
             {
               match_t.slice(-9,-4)
             }
@@ -246,7 +254,7 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
           }
 
         <div className="flex items-center gap-1.5 shrink-0">
-          {isFinished ? (
+          {match?.status !== "TIMED" ? (
             <div className="flex items-center gap-1">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center">
                 <span className="text-lg font-bold">{match?.score?.fullTime?.home}</span>
@@ -256,6 +264,7 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
                 <span className="text-lg font-bold">{match?.score?.fullTime?.away}</span>
               </div>
             </div>
+            
           ) : (
             <>
             {canBet && (

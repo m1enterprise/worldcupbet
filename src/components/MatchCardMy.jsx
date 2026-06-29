@@ -14,8 +14,8 @@ const USER_NAMES = {
 
 const PHASE_NAMES = {
   group: "Faza grupowa",
-  round_of_32: "1/16 finału",
-  round_of_16: "1/8 finału",
+  LAST_32: "1/16 finału",
+  LAST_16: "1/8 finału",
   quarter_final: "Ćwierćfinał",
   semi_final: "Półfinał",
   third_place: "Mecz o 3. miejsce",
@@ -124,18 +124,20 @@ function MatchCardMy({
 
           {isKnockout && (
             <span className="text-[10px] font-bold px-2 py-0.5 bg-primary/10 text-primary rounded-full">
-              {PHASE_NAMES[match?.phase]}
+              {
+              PHASE_NAMES[match?.stage]
+              }
             </span>
           )}
         </div>
 
-        {match?.status === "LIVE" ? (
+        {match?.status !== "TIMED" && match?.status !== "FINISHED" ? (
           <div className="flex justify-center">
           <span className="text-[10px] text-center font-bold px-2 py-0.5 bg-red-500 text-white rounded-full animate-pulse">
               MECZ TRWA
             </span>
           </div>
-        ) : (<div></div>)}
+        ) : <div></div>}
 
         <span className="text-[11px] text-muted-foreground font-medium text-right">
           {matchTime}
@@ -271,7 +273,7 @@ function MatchCardMy({
               }`}
             >
               <span className="text-muted-foreground text-left">
-                TWÓJ BET
+                BET
               </span>
 
               <span className="text-muted-foreground text-center">

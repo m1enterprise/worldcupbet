@@ -13,8 +13,8 @@ const USER_NAMES = {
 
 const PHASE_NAMES = {
   group: "Faza grupowa",
-  round_of_32: "1/16 finału",
-  round_of_16: "1/8 finału",
+  LAST_32: "1/16 finału",
+  LAST_16: "1/8 finału",
   quarter_final: "Ćwierćfinał",
   semi_final: "Półfinał",
   third_place: "Mecz o 3. miejsce",
@@ -60,7 +60,10 @@ function MatchCardAll({
 
           {isKnockout && (
             <span className="text-[10px] font-bold px-2 py-0.5 bg-primary/10 text-primary rounded-full">
-              {PHASE_NAMES[match?.phase]}
+              {
+              PHASE_NAMES[match?.stage]
+              }
+
             </span>
           )}
         </div>
@@ -71,7 +74,7 @@ function MatchCardAll({
               MECZ TRWA
             </span>
           </div>
-        ) : (<div></div>)}
+        ): <div></div>}
 
         <span className="text-[11px] text-muted-foreground font-medium text-right">
           {matchTime}
