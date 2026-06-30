@@ -39,10 +39,7 @@ function MatchCardMy({
     match.score.duration === "EXTRA_TIME" || match.score.duration === "PENALTY_SHOOTOUT";
 
   if (wentToET) {
-    const regular_score = match.score.regularTime
     match.score.fullTime = match.score.regularTime
-
-    console.log("RS", regular_score)
   }
 
   // console.log("MATCH", match)
@@ -204,6 +201,31 @@ function MatchCardMy({
               </div>
             </div>
           )}
+
+          {wentToET && (
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 flex items-center gap-1">
+
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+                  <span className="text-xs font-bold">
+                    {match?.score?.extraTime?.home || match?.score?.penalties?.home}
+                  </span>
+                </div>
+
+                <span className="text-center text-xs text-muted-foreground">
+                  {
+                  match?.score?.extraTime?.home ? "ET" : match?.score?.penalties?.home ? "PEN" : ""
+                  }
+                </span>
+
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+                  <span className="text-xs font-bold">
+                    {match?.score?.extraTime?.away || match?.score?.penalties?.away}
+                  </span>
+                </div>
+                
+              </div>
+            )}
+
         </div>
 
         {/* AWAY */}
