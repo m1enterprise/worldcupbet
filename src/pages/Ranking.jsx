@@ -121,6 +121,17 @@ export default function Ranking() {
               userBets.map(bet=>{
                 const matchBetData = matches?.filter((item)=>String(item?.id) === String(bet?.matchId))?.[0]
                 if (matchBetData.status !== "FINISHED") return
+
+                const wentToET =
+                  matchBetData.score.duration === "EXTRA_TIME" || matchBetData.score.duration === "PENALTY_SHOOTOUT";
+
+                if (wentToET) {
+                  const regular_score = matchBetData.score.regularTime
+                  matchBetData.score.fullTime = matchBetData.score.regularTime
+
+                  console.log("RS", regular_score)
+                }
+
                 const userBetInfo = calcMatchPoints(bet, matchBetData)
                 userObject.userBets.push(userBetInfo)
               })
