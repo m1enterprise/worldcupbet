@@ -29,6 +29,15 @@ function MatchCardAll({
   const isKnockout = match?.stage !== "GROUP_STAGE";
   const isFinished = match?.status === "FINISHED";
   const isStarted = new Date(match?.utcDate) <= new Date()
+  const wentToET =
+    match.score.duration === "EXTRA_TIME" || match.score.duration === "PENALTY_SHOOTOUT";
+
+  if (wentToET) {
+    const regular_score = match.score.regularTime
+    match.score.fullTime = match.score.regularTime
+
+    console.log("RS", regular_score)
+  }
 
   if (matchAllBets) {
     matchAllBets = [...matchAllBets]

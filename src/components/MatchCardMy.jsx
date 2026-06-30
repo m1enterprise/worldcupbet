@@ -35,6 +35,16 @@ function MatchCardMy({
   const isFinished =
     match?.status === "FINISHED";
 
+  const wentToET =
+    match.score.duration === "EXTRA_TIME" || match.score.duration === "PENALTY_SHOOTOUT";
+
+  if (wentToET) {
+    const regular_score = match.score.regularTime
+    match.score.fullTime = match.score.regularTime
+
+    console.log("RS", regular_score)
+  }
+
   // console.log("MATCH", match)
   // console.log("FETCHEDBETDATA", fetchedBetData)
   // console.log("ALLBETSDATA", allBetsData)

@@ -159,6 +159,16 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
 
   const fetchedBet = fetchedBetData?.find((bet) => String(bet?.matchId) === String(match?.id))
 
+  const wentToET =
+    match.score.duration === "EXTRA_TIME" || match.score.duration === "PENALTY_SHOOTOUT";
+
+  if (wentToET) {
+    const regular_score = match.score.regularTime
+    match.score.fullTime = match.score.regularTime
+
+    console.log("RS", regular_score)
+  }
+
   // const [etWinner, setEtWinner] = useState(null)
   const handleScore = (side, value) => {
     const val = value === "" ? "" : Math.max(0, parseInt(value) || 0);
@@ -264,7 +274,7 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
                 <span className="text-lg font-bold">{match?.score?.fullTime?.away}</span>
               </div>
             </div>
-            
+
           ) : (
             <>
             {canBet && (

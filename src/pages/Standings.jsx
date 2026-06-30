@@ -10,9 +10,9 @@ function BottomNav() {
   const items = [
     { path: "/", icon: LoaderPinwheel, label: "Mecze" },
     { path: "/standings", icon: Table2, label: "Tabele" },
-    { path: "/my-bets", icon: Star, label: "Moje typy" },
+    { path: "/my-bets", icon: Star, label: "Bety" },
     // { path: "/points", icon: BarChart3, label: "Punkty" },
-    { path: "/ranking", icon: Users, label: "Bety" },
+    { path: "/ranking", icon: Users, label: "Ranking" },
   ];
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border">
@@ -126,6 +126,14 @@ function ScorersTable({ scorers, title, statKey }) {
   );
 }
 
+function PlayoffsTable({}) {
+  return (
+    <div>
+      PLAYOFFS
+    </div>
+  )
+}
+
 import standingsData from "../lib/standings.json";
 import { getStandings } from "../services/standingService";
 import { getScorers } from "../services/scorersService";
@@ -158,6 +166,7 @@ export default function Standings() {
 
     const tabs = [
       { key: "groups", label: "Tabela" },
+      { key: "playoffs", label: "Play Offy"},
       { key: "scorers", label: "Strzelcy" },
       // { key: "assists", label: "Asysty" },
     ];
@@ -205,9 +214,10 @@ export default function Standings() {
               {activeTab === "scorers" && (
                 <ScorersTable scorers={[...scorers].sort((a, b) => b.player_goals - a.player_goals)} title="Król strzelców" statKey="goals" />
               )}
-              {activeTab === "assists" && (
-                <ScorersTable scorers={[...scorers].sort((a, b) => b.assists - a.assists)} title="Król asyst" statKey="assists" />
+              {activeTab === "playoffs" && (
+                standings.map((entry, i) => <PlayoffsTable key={i} entry={entry} />)
               )}
+              
             </div>
           )}
         </div>

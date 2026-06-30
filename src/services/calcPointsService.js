@@ -144,6 +144,12 @@ export function calcMatchPoints(bet, match) {
     return { points: 7, isCorrect: true, isExact: true, isSuperExact: true };
   }
 
+  console.log(match.id === 140 ?( betExtWinner, realExtWinner): (""))
+  // 5 pkt: dokładny wynik do 90 min i nie trafiony ET winner
+  if (exactScore && wentToET && betExtWinner !== realExtWinner) {
+    return { points: 5, isCorrect: true, isExact: true };
+  }
+
   // 5 pkt: dokładny wynik do 90 min (bez dogrywki)
   if (exactScore && !wentToET) {
     return { points: 5, isCorrect: true, isExact: true };
