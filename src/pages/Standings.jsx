@@ -129,7 +129,7 @@ function ScorersTable({ scorers, title, statKey }) {
 function PlayoffsTable({}) {
   return (
     <div>
-      PLAYOFFS
+      PLAYOFF MATCH WILL BE VISIBLE SOON
     </div>
   )
 }
