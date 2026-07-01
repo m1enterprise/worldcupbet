@@ -322,8 +322,9 @@ export default function Ranking() {
                         {player.userId === 18 && (
                          <> <span className="text-muted-foreground text-xs font-normal"> {`${player?.userPointsReal} - karne 100pkt` }{" "}</span>{"      "} {player.userPoints}</>
                         )}
-                      </span>
 
+                      </span>
+                      
                       <span className="text-sm text-center text-green-600 font-bold">{player.userPointsCorrect}</span>
                       <span className="text-sm text-center text-primary font-bold">{player.userPointsExact}</span>
                     </div>
