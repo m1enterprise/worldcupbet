@@ -324,7 +324,6 @@ export default function Ranking() {
                         )}
 
                       </span>
-                      
                       <span className="text-sm text-center text-green-600 font-bold">{player.userPointsCorrect}</span>
                       <span className="text-sm text-center text-primary font-bold">{player.userPointsExact}</span>
                     </div>
