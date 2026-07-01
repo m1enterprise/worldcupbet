@@ -137,6 +137,9 @@ function PlayoffsTable({}) {
 import standingsData from "../lib/standings.json";
 import { getStandings } from "../services/standingService";
 import { getScorers } from "../services/scorersService";
+import PlayoffsView from "../components/PlayoffsView";
+import { getMatches } from "../services/matchService";
+import { set } from "lodash";
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function Standings() {
@@ -148,6 +151,7 @@ export default function Standings() {
   const [activeTab, setActiveTab] = useState("groups");
   const [standings, setStandings] = useState([]);
   const [scorers, setScorers] = useState([]);
+  const [matches, setMatches] = useState([])
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -159,6 +163,9 @@ export default function Standings() {
 
         const scorers = await getScorers()
         setScorers(scorers)
+
+        const matches = await getMatches()
+        setMatches(matches)
       };
       fetchData();
       setLoading(false);
@@ -215,7 +222,8 @@ export default function Standings() {
                 <ScorersTable scorers={[...scorers].sort((a, b) => b.player_goals - a.player_goals)} title="Król strzelców" statKey="goals" />
               )}
               {activeTab === "playoffs" && (
-                standings.map((entry, i) => <PlayoffsTable key={i} entry={entry} />)
+                // standings.map((entry, i) => <PlayoffsTable key={i} entry={entry} />)
+                <PlayoffsView matches={matches}/>
               )}
               
             </div>

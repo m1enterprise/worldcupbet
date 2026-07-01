@@ -232,6 +232,8 @@ export default function Ranking() {
 
   if (!session) return null;
 
+  console.log("test")
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header username={session?.username} />
@@ -290,7 +292,7 @@ export default function Ranking() {
                     : 0;
                   return (
                     <div key={player.userId}
-                      className={`grid grid-cols-[32px_1fr_52px_52px_52px] gap-1 px-4 py-3 items-center transition-colors
+                      className={`grid grid-cols-[32px_1fr_252px_52px_52px] gap-1 px-4 py-3 items-center transition-colors
                         ${player.isMe ? "bg-primary/5 border-l-2 border-primary" : ""}
                         ${idx < 3 ? MEDAL_BG[idx] : ""}
                       `}>
@@ -308,9 +310,12 @@ export default function Ranking() {
                         </p>
                         {/* <p className="text-[10px] text-muted-foreground">{accuracy}% trafność</p> */}
                       </div>
-                      <span className={`text-base font-bold text-center ${idx === 0 ? "text-green-600" : idx === 1 ? "text-green-600" : idx === 2 ? "text-green-600" : "text-green-600"}`}>
-                        {player.userPoints}
+
+                      <span className={`text-base font-bold text-right pr-3 ${idx === 0 ? "text-green-600" : idx === 1 ? "text-green-600" : idx === 2 ? "text-green-600" : "text-green-600"}`}>
+                        {player.userId !== 18 && player.userPoints}
+                        {player.userId === 18 && `${player.userPoints} - karne 100pkt = ${player.userPoints - 100}`}
                       </span>
+
                       <span className="text-sm text-center text-green-600 font-bold">{player.userPointsCorrect}</span>
                       <span className="text-sm text-center text-primary font-bold">{player.userPointsExact}</span>
                     </div>

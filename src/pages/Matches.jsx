@@ -124,7 +124,7 @@ function DaySelector({ dates, selectedDate, onSelect }) {
         const active = dateStr === selectedDate;
         return (
           <button key={dateStr} ref={active ? activeRef : null} onClick={() => onSelect(dateStr)}
-            className={`shrink-0 flex flex-col items-center px-3.5 py-2 rounded-xl transition-all ${active ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25" : "bg-card border border-border text-foreground hover:bg-muted"}`}>
+            className={`w-12 h-16 shrink-0 flex flex-col items-center px-3.5 py-2 rounded-xl transition-all ${active ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25" : "bg-card border border-border text-foreground hover:bg-muted"}`}>
             <span className="text-[10px] font-semibold uppercase tracking-wide opacity-70">{getLabel(dateStr)}</span>
             <span className="text-base font-bold leading-tight">{format(parseISO(dateStr), "d")}</span>
             <span className="text-[10px] font-medium opacity-60">{format(parseISO(dateStr), "MMM", { locale: pl })}</span>
@@ -168,6 +168,8 @@ function MatchCard({ match, bet, fetchedBetData, onChange, disabled }) {
 
   // const [etWinner, setEtWinner] = useState(null)
   const handleScore = (side, value) => {
+    
+    // if (value.type !== Number) return alert("wpisz kurwa cyfre")
     const val = value === "" ? "" : Math.max(0, parseInt(value) || 0);
     onChange(match, { homeScore: side === "home" ? val : bH, awayScore: side === "away" ? val : bA, extraTimeWinner: side === "etWinner" ? value : bET });
   };
