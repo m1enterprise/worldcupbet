@@ -116,6 +116,7 @@ export default function Ranking() {
                 userPointsCorrect: 0,
                 userPointsExact: 0,
                 userBets: [],
+                userPointsReal: 0
               }
 
               userBets.map(bet=>{
@@ -150,6 +151,11 @@ export default function Ranking() {
               userObject.userPoints=calc
               userObject.userPointsCorrect=calcCorrect
               userObject.userPointsExact=calcExact
+
+              if (userObject.userId === 18){
+                userObject.userPointsReal = userObject.userPoints
+                userObject.userPoints = userObject.userPoints - 100
+              }
 
               // console.log(userObject)
 
@@ -232,7 +238,7 @@ export default function Ranking() {
 
   if (!session) return null;
 
-  console.log("test")
+  console.log("test", allUsersBetCalc)
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -313,7 +319,9 @@ export default function Ranking() {
 
                       <span className={`text-base font-bold text-right pr-3 ${idx === 0 ? "text-green-600" : idx === 1 ? "text-green-600" : idx === 2 ? "text-green-600" : "text-green-600"}`}>
                         {player.userId !== 18 && player.userPoints}
-                        {player.userId === 18 && `${player.userPoints} - karne 100pkt = ${player.userPoints - 100}`}
+                        {player.userId === 18 && (
+                         <> <span className="text-muted-foreground text-xs font-normal"> {`${player?.userPointsReal} - karne 100pkt` }{" "}</span>{"      "} {player.userPoints}</>
+                        )}
                       </span>
 
                       <span className="text-sm text-center text-green-600 font-bold">{player.userPointsCorrect}</span>
